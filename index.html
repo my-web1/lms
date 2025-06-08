@@ -4,7 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IICP Login</title>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1.3/auth0-spa-js.production.js" defer></script>
+  <script>
+    // Dynamically load Auth0 SDK with fallback
+    function loadAuth0SDK() {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.auth0.com/js/auth0-spa-js/2.1.3/auth0-spa-js.production.js';
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = () => {
+          const fallbackScript = document.createElement('script');
+          fallbackScript.src = 'https://auth0-sdk-cdn.s3.amazonaws.com/auth0-spa-js/2.1.3/auth0-spa-js.production.js'; // Fallback URL
+          fallbackScript.defer = true;
+          fallbackScript.onload = resolve;
+          fallbackScript.onerror = () => reject(new Error('Failed to load Auth0 SDK from both primary and fallback URLs.'));
+          document.head.appendChild(fallbackScript);
+        };
+        document.head.appendChild(script);
+      });
+    }
+  </script>
   <style>
     * {
       margin: 0;
@@ -82,9 +101,11 @@
   <script defer>
     async function initAuth0() {
       try {
-        // Check if Auth0 SDK is loaded
+        // Load Auth0 SDK
+        await loadAuth0SDK();
+
         if (typeof createAuth0Client !== 'function') {
-          throw new Error('Auth0 SDK failed to load. Please check your internet connection or the CDN URL.');
+          throw new Error('Auth0 SDK failed to load after retry. Please check your internet connection or contact support.');
         }
 
         const auth0 = await createAuth0Client({
@@ -92,7 +113,7 @@
           clientId: 'drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ',
           authorizationParams: {
             redirect_uri: window.location.origin,
-            audience: 'https://dev-5b7cwnck12qn276l.us.auth0.com/api/v2/', // Optional: Add audience if required
+            audience: 'https://dev-5b7cwnck12qn276l.us.auth0.com/api/v2/',
           },
         });
 
@@ -114,11 +135,10 @@
         }
       } catch (err) {
         console.error('Auth0 Error:', err.message || err);
-        alert('An error occurred: ' + (err.message || 'Unknown error. Please check the console for details.'));
+        alert('An error occurred: ' + (err.message || 'Unknown error. Please check your internet connection or the CDN URL.'));
       }
     }
 
-    // Ensure the script runs only after the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', initAuth0);
   </script>
 </body>
