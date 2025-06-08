@@ -5,175 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IICP LMS</title>
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2, h3 {
-            color: #333;
-        }
-        .auth-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .auth-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            margin: 5px;
-        }
-        .auth-button:hover {
-            background-color: #0056b3;
-        }
-        .content-section {
-            display: none;
-        }
-        .content-section.active {
-            display: block;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin: 10px 0;
-        }
-        a {
-            text-decoration: none;
-            color: #007bff;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>IICP LMS</h1>
-        <h2>Industry Integrated Career Platform</h2>
+    <div id="authSection">
+        <button id="loginButton" onclick="login()">Login</button>
+        <button id="logoutButton" onclick="logout()" style="display: none;">Logout</button>
+        <div id="userProfile"></div>
+    </div>
 
-        <div class="auth-section" id="authSection">
-            <button class="auth-button" id="loginButton" onclick="login()">Login</button>
-            <button class="auth-button" id="logoutButton" onclick="logout()" style="display: none;">Logout</button>
-            <div id="userProfile" style="margin-top: 10px;"></div>
-        </div>
+    <div id="lmsContent" style="display: none;">
+        <header>
+            <h1>IICP LMS</h1>
+            <h2>Industry Integrated Career Platform</h2>
+            <nav>
+                <ul>
+                    <li><a href="#job-alerts">Job Alerts</a></li>
+                    <li><a href="#technical-tests">Technical Tests</a></li>
+                    <li><a href="#interview-techniques">Interview Techniques</a></li>
+                    <li><a href="#online-interview">Online/Virtual Interview</a></li>
+                    <li><a href="#body-language">Body Language</a></li>
+                    <li><a href="#technical-qa">Technical Interview Q&A</a></li>
+                    <li><a href="#self-introduction">Self Introduction</a></li>
+                    <li><a href="#cv-builder">CV Builder</a></li>
+                    <li><a href="#hr-questions">HR Interview Questions</a></li>
+                </ul>
+            </nav>
+        </header>
 
-        <div class="content-section" id="lmsContent">
-            <h3>Job Alerts</h3>
-            <ul>
-                <li><a href="#">WhatsApp Channel</a></li>
-                <li><a href="#">Telegram Channel</a></li>
-            </ul>
+        <main>
+            <section id="job-alerts">
+                <h3>Job Alerts</h3>
+                <ul>
+                    <li><a href="#">WhatsApp Channel</a></li>
+                    <li><a href="#">Telegram Channel</a></li>
+                </ul>
+            </section>
 
-            <h3>Technical Tests</h3>
-            <ul>
-                <li><a href="#">Aptitude Test 1</a></li>
-                <li><a href="#">Aptitude Test 2</a></li>
-                <li><a href="#">Aptitude Test 3</a></li>
-                <li><a href="#">Aptitude Test 4</a></li>
-                <li><a href="#">Aptitude Test 5</a></li>
-                <li><a href="#">Full Stack Test 1</a></li>
-                <li><a href="#">Full Stack Test 2</a></li>
-                <li><a href="#">Full Stack Test 3</a></li>
-                <li><a href="#">Full Stack Test 4</a></li>
-            </ul>
+            <section id="technical-tests">
+                <h3>Technical Tests</h3>
+                <ul>
+                    <li><a href="#">Aptitude Test 1</a></li>
+                    <li><a href="#">Aptitude Test 2</a></li>
+                    <li><a href="#">Aptitude Test 3</a></li>
+                    <li><a href="#">Aptitude Test 4</a></li>
+                    <li><a href="#">Aptitude Test 5</a></li>
+                    <li><a href="#">Full Stack Test 1</a></li>
+                    <li><a href="#">Full Stack Test 2</a></li>
+                    <li><a href="#">Full Stack Test 3</a></li>
+                    <li><a href="#">Full Stack Test 4</a></li>
+                </ul>
+            </section>
 
-            <h3>Interview Techniques</h3>
-            <ul>
-                <li><a href="#">Interview Techniques Video 1</a></li>
-                <li><a href="#">Interview Techniques Video 2</a></li>
-                <li><a href="#">Interview Techniques Video 3</a></li>
-                <li><a href="#">Interview Techniques Video 4</a></li>
-            </ul>
+            <section id="interview-techniques">
+                <h3>Interview Techniques</h3>
+                <ul>
+                    <li><a href="#">Interview Techniques Video 1</a></li>
+                    <li><a href="#">Interview Techniques Video 2</a></li>
+                    <li><a href="#">Interview Techniques Video 3</a></li>
+                    <li><a href="#">Interview Techniques Video 4</a></li>
+                </ul>
+            </section>
 
-            <h3>Online/Virtual Interview Techniques</h3>
-            <ul>
-                <li><a href="#">Virtual Interview Video 1</a></li>
-                <li><a href="#">Virtual Interview Video 2</a></li>
-            </ul>
+            <section id="online-interview">
+                <h3>Online/Virtual Interview Techniques</h3>
+                <ul>
+                    <li><a href="#">Virtual Interview Video 1</a></li>
+                    <li><a href="#">Virtual Interview Video 2</a></li>
+                </ul>
+            </section>
 
-            <h3>Body Language</h3>
-            <ul>
-                <li><a href="#">Body Language Video 1</a></li>
-                <li><a href="#">Body Language Video 2</a></li>
-            </ul>
+            <section id="body-language">
+                <h3>Body Language</h3>
+                <ul>
+                    <li><a href="#">Body Language Video 1</a></li>
+                    <li><a href="#">Body Language Video 2</a></li>
+                </ul>
+            </section>
 
-            <h3>Technical Interview Questions & Answers</h3>
-            <ul>
-                <li><a href="#">Power BI Q&A</a></li>
-                <li><a href="#">Manual Testing Q&A</a></li>
-                <li><a href="#">Data Science Q&A</a></li>
-                <li><a href="#">Spring Boot Q&A</a></li>
-                <li><a href="#">Java Q&A</a></li>
-                <li><a href="#">Node.js Q&A</a></li>
-                <li><a href="#">AWS DevOps Q&A</a></li>
-                <li><a href="#">Linux Q&A</a></li>
-                <li><a href="#">Financial Analyst Q&A</a></li>
-                <li><a href="#">System Design Q&A</a></li>
-                <li><a href="#">SQL Q&A</a></li>
-                <li><a href="#">SOC Analyst Q&A</a></li>
-                <li><a href="#">AWS Q&A</a></li>
-                <li><a href="#">CSS Q&A</a></li>
-                <li><a href="#">C Programming Q&A</a></li>
-                <li><a href="#">Data Engineer Q&A</a></li>
-                <li><a href="#">Excel Q&A</a></li>
-                <li><a href="#">DBMS Q&A</a></li>
-                <li><a href="#">JavaScript Q&A</a></li>
-                <li><a href="#">Project Manager Q&A</a></li>
-                <li><a href="#">Machine Learning Q&A</a></li>
-                <li><a href="#">Django Q&A</a></li>
-                <li><a href="#">Cyber Security Q&A</a></li>
-                <li><a href="#">OOPS Q&A</a></li>
-                <li><a href="#">Python Q&A</a></li>
-                <li><a href="#">Business Analyst Q&A</a></li>
-                <li><a href="#">Azure Q&A</a></li>
-                <li><a href="#">Full Stack Developer Q&A</a></li>
-                <li><a href="#">C++ Q&A</a></li>
-                <li><a href="#">Data Analyst Q&A</a></li>
-            </ul>
+            <section id="technical-qa">
+                <h3>Technical Interview Questions & Answers</h3>
+                <ul>
+                    <li><a href="#">Power BI Q&A</a></li>
+                    <li><a href="#">Manual Testing Q&A</a></li>
+                    <li><a href="#">Data Science Q&A</a></li>
+                    <li><a href="#">Spring Boot Q&A</a></li>
+                    <li><a href="#">Java Q&A</a></li>
+                    <li><a href="#">Node.js Q&A</a></li>
+                    <li><a href="#">AWS DevOps Q&A</a></li>
+                    <li><a href="#">Linux Q&A</a></li>
+                    <li><a href="#">Financial Analyst Q&A</a></li>
+                    <li><a href="#">System Design Q&A</a></li>
+                    <li><a href="#">SQL Q&A</a></li>
+                    <li><a href="#">SOC Analyst Q&A</a></li>
+                    <li><a href="#">AWS Q&A</a></li>
+                    <li><a href="#">CSS Q&A</a></li>
+                    <li><a href="#">C Programming Q&A</a></li>
+                    <li><a href="#">Data Engineer Q&A</a></li>
+                    <li><a href="#">Excel Q&A</a></li>
+                    <li><a href="#">DBMS Q&A</a></li>
+                    <li><a href="#">JavaScript Q&A</a></li>
+                    <li><a href="#">Project Manager Q&A</a></li>
+                    <li><a href="#">Machine Learning Q&A</a></li>
+                    <li><a href="#">Django Q&A</a></li>
+                    <li><a href="#">Java Q&A</a></li>
+                    <li><a href="#">Cyber Security Q&A</a></li>
+                    <li><a href="#">OOPS Q&A</a></li>
+                    <li><a href="#">Python Q&A</a></li>
+                    <li><a href="#">Business Analyst Q&A</a></li>
+                    <li><a href="#">Azure Q&A</a></li>
+                    <li><a href="#">Full Stack Developer Q&A</a></li>
+                    <li><a href="#">C++ Q&A</a></li>
+                    <li><a href="#">Data Analyst Q&A</a></li>
+                </ul>
+            </section>
 
-            <h3>Self Introduction</h3>
-            <p>
-                <strong>Standard Template:</strong><br>
-                Hello, my name is [Your Name]. I am a [Your Profession/Role] with [X years] of experience in [Your Field/Industry]. I specialize in [Key Skills or Expertise]. I am passionate about [Your Interests or Career Goals], and I am excited to contribute to [Company/Team Name] by [Specific Contribution or Value].
-            </p>
-            <p><a href="#">Add External Resource</a></p>
+            <section id="self-introduction">
+                <h3>Self Introduction</h3>
+                <p>
+                    <strong>Standard Template:</strong><br>
+                    Hello, my name is [Your Name]. I am a [Your Profession/Role] with [X years] of experience in [Your Field/Industry]. I specialize in [Key Skills or Expertise]. I am passionate about [Your Interests or Career Goals], and I am excited to contribute to [Company/Team Name] by [Specific Contribution or Value].
+                </p>
+                <p><a href="#">Add External Resource</a></p>
+            </section>
 
-            <h3>CV Builder & Templates</h3>
-            <p>Explore professional CV formats to enhance your job applications.</p>
-            <p><a href="#">CV Formats</a></p>
+            <section id="cv-builder">
+                <h3>CV Builder & Templates</h3>
+                <p>Explore professional CV formats to enhance your job applications.</p>
+                <p><a href="#">CV Formats</a></p>
+            </section>
 
-            <h3>HR Interview Questions</h3>
-            <p>
-                <strong>Standard Template:</strong><br>
-                1. Tell me about yourself.<br>
-                2. What are your strengths and weaknesses?<br>
-                3. Why do you want to work with us?<br>
-                4. Where do you see yourself in 5 years?<br>
-                5. Describe a challenging situation and how you handled it.
-            </p>
-            <p><a href="#">Add External Resource</a></p>
-        </div>
+            <section id="hr-questions">
+                <h3>HR Interview Questions</h3>
+                <p>
+                    <strong>Standard Template:</strong><br>
+                    1. Tell me about yourself.<br>
+                    2. What are your strengths and weaknesses?<br>
+                    3. Why do you want to work with us?<br>
+                    4. Where do you see yourself in 5 years?<br>
+                    5. Describe a challenging situation and how you handled it.
+                </p>
+                <p><a href="#">Add External Resource</a></p>
+            </section>
+        </main>
 
         <footer>
             Dr. Sachin Ambekar's IICP - Join Dr. Sachin Ambekar's IICP - Industry Integrated Career Platform to bridge the gap between education and industry.
@@ -193,11 +166,9 @@
                     }
                 });
 
-                // Check if user is authenticated
                 const isAuthenticated = await auth0Client.isAuthenticated();
                 updateUI(isAuthenticated);
 
-                // Handle redirect callback after login
                 if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
                     await auth0Client.handleRedirectCallback();
                     window.history.replaceState({}, document.title, window.location.pathname);
@@ -237,18 +208,17 @@
             if (isAuthenticated) {
                 const user = await auth0Client.getUser();
                 loginButton.style.display = 'none';
-                logoutButton.style.display = 'inline-block';
+                logoutButton.style.display = 'inline';
                 userProfile.innerHTML = `Welcome, ${user.name || user.email}`;
-                lmsContent.classList.add('active');
+                lmsContent.style.display = 'block';
             } else {
-                loginButton.style.display = 'inline-block';
+                loginButton.style.display = 'inline';
                 logoutButton.style.display = 'none';
                 userProfile.innerHTML = '';
-                lmsContent.classList.remove('active');
+                lmsContent.style.display = 'none';
             }
         }
 
-        // Initialize Auth0 on page load
         window.onload = initAuth0;
     </script>
 </body>
