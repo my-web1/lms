@@ -44,30 +44,38 @@
 <!-- Auth0 Script -->
 <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 <script>
-  // Configure Auth0 client
-  const auth0 = new auth0Spa.Auth0Client({
-    domain: "dev-5b7cwnck12qn276l.us.auth0.com",
-    client_id: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
-    redirect_uri: window.location.origin
-  });
+  let auth0Client;
 
-  // Handle login button
-  document.getElementById("login").addEventListener("click", async () => {
-    await auth0.loginWithRedirect();
-  });
+  async function initAuth0() {
+    auth0Client = await createAuth0Client({
+      domain: "dev-5b7cwnck12qn276l.us.auth0.com",
+      client_id: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
+      redirect_uri: window.location.origin
+    });
 
-  // Handle redirect after login
-  window.onload = async () => {
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      const user = await auth0.getUser();
-      if (user) {
-        // Redirect to LMS page after successful login
-        window.location.href = "https://lms.iicp.in/lms.html";
+    // Handle redirect callback from Auth0
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+      try {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/"); // clean URL
+      } catch (err) {
+        console.error("Redirect handling error:", err);
       }
     }
-  };
+
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    if (isAuthenticated) {
+      window.location.href = "https://lms.iicp.in/lms.html"; // redirect after login
+    }
+  }
+
+  // Login click event
+  document.getElementById("login").addEventListener("click", async () => {
+    await auth0Client.loginWithRedirect();
+  });
+
+  // Initialize Auth0
+  initAuth0();
 </script>
 
 </body>
