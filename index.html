@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IICP LMS - Industry Integrated Career Platform</title>
@@ -57,6 +58,44 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
 <body>
+
+    <div id="auth-buttons"></div>
+<div id="user-profile"></div>
+
+<script>
+let auth0Client = null;
+async function configureClient() {
+    auth0Client = await createAuth0Client({
+        domain: "dev-5b7cwnck12qn276l.us.auth0.com",
+        clientId: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
+        cacheLocation: "localstorage",
+        authorizationParams: { redirect_uri: window.location.origin }
+    });
+}
+async function updateUI() {
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    const authButtons = document.getElementById('auth-buttons');
+    const userProfile = document.getElementById('user-profile');
+    if (isAuthenticated) {
+        const user = await auth0Client.getUser();
+        authButtons.innerHTML = '<button id="logout">Logout</button>';
+        userProfile.textContent = "Welcome, " + (user.name || user.email || "User");
+        document.getElementById('logout').onclick = () => auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
+    } else {
+        authButtons.innerHTML = '<button id="login">Login</button>';
+        userProfile.textContent = "";
+        document.getElementById('login').onclick = () => auth0Client.loginWithRedirect();
+    }
+}
+window.onload = async () => {
+    await configureClient();
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    updateUI();
+};
+</script>
     <div class="header">
         <h1>IICP LMS</h1>
         <p>Industry Integrated Career Platform</p>
