@@ -1,82 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IICP-LMS Login</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .login-container {
-      background: #fff;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
+  <meta charset="utf-8" />
 </head>
 <body>
+  <div>
+    <h2>Welcome to IICP-LMS</h2>
+    <button id="login">Login with Auth0</button>
+  </div>
 
-<div class="login-container">
-  <h2>Welcome to IICP-LMS</h2>
-  <button id="login">Login with Auth0</button>
-</div>
+  <!-- ✅ Load Auth0 script -->
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
 
-<!-- Auth0 Script -->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-<script>
-  let auth0Client;
+  <!-- ✅ Your custom script -->
+  <script>
+    let auth0Client = null;
 
-  async function initAuth0() {
-    auth0Client = await createAuth0Client({
-      domain: "dev-5b7cwnck12qn276l.us.auth0.com",
-      client_id: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
-      redirect_uri: window.location.origin
-    });
+    const initAuth0 = async () => {
+      auth0Client = await createAuth0Client({
+        domain: "dev-5b7cwnck12qn276l.us.auth0.com",
+        client_id: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
+        redirect_uri: "https://lms.iicp.in/IICP-LMS.html"
+      });
 
-    // Handle redirect callback from Auth0
-    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-      try {
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
         await auth0Client.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/"); // clean URL
-      } catch (err) {
-        console.error("Redirect handling error:", err);
+        window.history.replaceState({}, document.title, "/IICP-LMS.html");
+        window.location.href = "https://lms.iicp.in/lms.html"; // ✅ final redirect
       }
-    }
+    };
 
-    const isAuthenticated = await auth0Client.isAuthenticated();
-    if (isAuthenticated) {
-      window.location.href = "https://lms.iicp.in/lms.html"; // redirect after login
-    }
-  }
+    window.onload = () => {
+      initAuth0();
 
-  // Login click event
-  document.getElementById("login").addEventListener("click", async () => {
-    await auth0Client.loginWithRedirect();
-  });
-
-  // Initialize Auth0
-  initAuth0();
-</script>
-
+      const loginBtn = document.getElementById("login");
+      loginBtn.addEventListener("click", async () => {
+        if (auth0Client) {
+          await auth0Client.loginWithRedirect();
+        }
+      });
+    };
+  </script>
 </body>
 </html>
