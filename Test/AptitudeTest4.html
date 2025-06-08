@@ -1,0 +1,505 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aptitude Test - IICP</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2a2a72, #009ffd);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+    }
+
+    .quiz-container {
+      max-width: 850px;
+      width: 90%;
+      background: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      padding: 2.5rem;
+      margin: 1.5rem;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .quiz-container:hover {
+      transform: translateY(-5px);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      text-align: center;
+      color: #1a3c5e;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #005a9e;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.9rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #005a9e;
+      box-shadow: 0 0 8px rgba(0, 90, 158, 0.2);
+      outline: none;
+    }
+
+    input[type="radio"] {
+      width: 1.3rem;
+      height: 1.3rem;
+      margin-right: 0.8rem;
+      accent-color: #005a9e;
+    }
+
+    .option-container {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .option-container:hover {
+      background-color: #f5faff;
+      border-color: #b3d4fc;
+    }
+
+    input[type="radio"]:checked + label {
+      color: #005a9e;
+      font-weight: 500;
+    }
+
+    button {
+      padding: 0.9rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn,
+    .next-btn,
+    .restart-btn {
+      background: linear-gradient(90deg, #005a9e, #007acc);
+      color: white;
+    }
+
+    .submit-btn:hover,
+    .next-btn:hover,
+    .restart-btn:hover {
+      background: linear-gradient(90deg, #004a8e, #006bb8);
+    }
+
+    .prev-btn {
+      background: #e5e7eb;
+      color: #333;
+    }
+
+    .prev-btn:hover {
+      background: #d1d5db;
+    }
+
+    .prev-btn:disabled {
+      background: #f0f0f0;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: #e0e0e0;
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #005a9e, #007acc);
+      transition: width 0.3s ease;
+    }
+
+    .timer {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #d32f2f;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+
+    .space-y-6 > * + * {
+      margin-top: 1.5rem;
+    }
+
+    .list-disc {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 1rem;
+      text-align: center;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #fff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <!-- Login Screen -->
+    <div id="login-screen" class="space-y-6">
+      <h1>Aptitude Test by IICP</h1>
+      <p class="text-center">Enter your name and password to access the test.</p>
+      <div class="space-y-4">
+        <input id="name-input" type="text" placeholder="Enter your name" required>
+        <input id="password-input" type="password" placeholder="Password" required>
+        <p id="login-error" class="error-message hidden">Invalid password. Please use format ddmmyyyy.</p>
+        <button onclick="validateLogin()" class="submit-btn" style="width: 100%;">Submit</button>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <h1>Aptitude Test for IT Industry</h1>
+        <div id="timer" class="timer">30:00</div>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+      </div>
+      <p id="welcome-message"></p>
+      <div id="question-container" class="space-y-4">
+        <h2 id="section-title"></h2>
+        <p id="question-text"></p>
+        <div id="options-container" class="space-y-2"></div>
+      </div>
+      <div class="flex justify-between">
+        <button id="prev-btn" onclick="prevQuestion()" class="prev-btn" disabled>Previous</button>
+        <button id="next-btn" onclick="nextQuestion()" class="next-btn">Next</button>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="hidden space-y-6">
+      <h1 class="text-center">Test Results</h1>
+      <div class="space-y-4">
+        <p id="total-score" style="font-size: 1.2rem; font-weight: 500;"></p>
+        <p id="quantitative-score"></p>
+        <p id="logical-score"></p>
+        <p id="verbal-score"></p>
+        <p id="technical-score"></p>
+        <div>
+          <h2 style="font-size: 1.3rem; font-weight: 500; color: #005a9e;">Areas for Improvement</h2>
+          <ul id="improvement-areas" class="list-disc"></ul>
+        </div>
+      </div>
+      <button onclick="restartTest()" class="restart-btn" style="width: 100%;">Restart Test</button>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Dr. Sachin Ambekar's IICP - Industry Integrated Career Platform | <a href="https://www.iicp.in">www.iicp.in</a>
+  </footer>
+
+  <script>
+const questions = [
+  { section: "Quantitative Aptitude", text: "A truck travels 300 km in 5 hours. What is its speed in km/hr?", options: ["60 km/hr", "50 km/hr", "70 km/hr", "80 km/hr"], answer: "60 km/hr" },
+  { section: "Quantitative Aptitude", text: "An item is sold for Rs. 900 at a 10% loss. What is the cost price?", options: ["Rs. 1000", "Rs. 950", "Rs. 850", "Rs. 1100"], answer: "Rs. 1000" },
+  { section: "Quantitative Aptitude", text: "What is 40% of 250?", options: ["100", "90", "110", "120"], answer: "100" },
+  { section: "Quantitative Aptitude", text: "The ages of X and Y are in the ratio 7:4, and their total age is 33. How old is Y?", options: ["12", "21", "15", "18"], answer: "12" },
+  { section: "Quantitative Aptitude", text: "A boat travels 450 km at a speed of 150 km/hr. How long does the journey take?", options: ["3 hours", "2 hours", "4 hours", "5 hours"], answer: "3 hours" },
+  { section: "Quantitative Aptitude", text: "If 3 workers can finish a task in 9 days, how many days will 6 workers take?", options: ["4.5 days", "5 days", "6 days", "3 days"], answer: "4.5 days" },
+  { section: "Quantitative Aptitude", text: "What is the simple interest on Rs. 6000 at 8% per annum for 2 years?", options: ["Rs. 960", "Rs. 900", "Rs. 1000", "Rs. 850"], answer: "Rs. 960" },
+  { section: "Quantitative Aptitude", text: "The average of 5 numbers is 18. If one number is 14, what is the average of the remaining 4 numbers?", options: ["19", "18", "20", "17"], answer: "19" },
+  { section: "Quantitative Aptitude", text: "A train 120 m long passes a pole in 4 seconds. What is its speed in km/hr?", options: ["108 km/hr", "90 km/hr", "120 km/hr", "100 km/hr"], answer: "108 km/hr" },
+  { section: "Quantitative Aptitude", text: "What is the LCM of 9 and 15?", options: ["45", "30", "60", "15"], answer: "45" },
+  { section: "Quantitative Aptitude", text: "If a number is divisible by both 4 and 9, is it always divisible by 36?", options: ["Yes", "No", "Only if odd", "Only if even"], answer: "Yes" },
+  { section: "Quantitative Aptitude", text: "P and Q together can complete a task in 8 days, and P alone can do it in 12 days. How many days will Q take alone?", options: ["24 days", "20 days", "16 days", "28 days"], answer: "24 days" },
+  { section: "Quantitative Aptitude", text: "What is the area of a triangle with base 6 cm and height 4 cm?", options: ["12 cm²", "10 cm²", "14 cm²", "16 cm²"], answer: "12 cm²" },
+  { section: "Quantitative Aptitude", text: "What is the probability of rolling a number greater than 4 on a six-sided die?", options: ["1/3", "1/2", "2/3", "1/4"], answer: "1/3" },
+  { section: "Quantitative Aptitude", text: "If an item costs Rs. 2400 after a 20% discount, what was its original price?", options: ["Rs. 3000", "Rs. 2800", "Rs. 2600", "Rs. 3200"], answer: "Rs. 3000" },
+  { section: "Logical Reasoning", text: "Which number does not belong in the series: 2, 6, 12, 20, 30?", options: ["20", "2", "6", "12"], answer: "20" },
+  { section: "Logical Reasoning", text: "If 'BALL' is coded as 'CFNO', how is 'GAME' coded?", options: ["IFPH", "HGNF", "JFQI", "IGOG"], answer: "JFQI" },
+  { section: "Logical Reasoning", text: "If tomorrow is Monday, what day is it today?", options: ["Sunday", "Saturday", "Tuesday", "Wednesday"], answer: "Sunday" },
+  { section: "Logical Reasoning", text: "Complete the series: 5, 10, 20, 40, __?", options: ["80", "60", "100", "120"], answer: "80" },
+  { section: "Logical Reasoning", text: "If E is F’s sister, F is G’s brother, and G is H’s son, what is E’s relationship to H?", options: ["Daughter", "Son", "Wife", "Sister"], answer: "Daughter" },
+  { section: "Logical Reasoning", text: "Find the odd one out: 8, 16, 24, 31, 40.", options: ["31", "8", "16", "24"], answer: "31" },
+  { section: "Logical Reasoning", text: "If all dogs bark and some dogs are poodles, which statement must be true?", options: ["Poodles bark", "All poodles are dogs", "Some dogs do not bark", "All barking things are dogs"], answer: "Poodles bark" },
+  { section: "Logical Reasoning", text: "In a row of 15 people, D is 6th from the left. What is D’s position from the right?", options: ["10th", "9th", "8th", "11th"], answer: "10th" },
+  { section: "Logical Reasoning", text: "If the code for 'FISH' is 'GJTK', what is the code for 'BIRD'?", options: ["CKTF", "BJSE", "DLUG", "AJRD"], answer: "CKTF" },
+  { section: "Logical Reasoning", text: "What comes next in the sequence: 3, 6, 12, 24, __?", options: ["48", "36", "60", "72"], answer: "48" },
+  { section: "Logical Reasoning", text: "If today is Tuesday, what day will it be after 45 days?", options: ["Wednesday", "Monday", "Thursday", "Friday"], answer: "Monday" },
+  { section: "Logical Reasoning", text: "Which number does not belong: 4, 16, 64, 255, 1024?", options: ["255", "4", "16", "64"], answer: "255" },
+  { section: "Logical Reasoning", text: "A is taller than B, B is taller than C, and C is taller than D. Who is the shortest?", options: ["D", "C", "B", "A"], answer: "D" },
+  { section: "Logical Reasoning", text: "If 'CLOUD' is coded as 'DPVNE', how is 'STORM' coded?", options: ["TUPQN", "SVPRN", "TUQRO", "STPRM"], answer: "TUQRO" },
+  { section: "Logical Reasoning", text: "Complete the analogy: Big is to small as fast is to __?", options: ["slow", "quick", "rapid", "swift"], answer: "slow" },
+  { section: "Verbal Ability", text: "Choose the correct synonym for 'enormous':", options: ["Huge", "Small", "Tiny", "Little"], answer: "Huge" },
+  { section: "Verbal Ability", text: "The statement, 'Kiran loves music,' is supported by which two statements? Statement 1: Kiran plays the guitar. Statement 2: Neha is 22 years old. Statement 3: Neha loves music. Statement 4: Kiran shares Neha’s interests. Statement 5: Neha enjoys dancing.", options: ["3 & 4", "1 & 3", "4 & 5", "2 & 3"], answer: "3 & 4" },
+  { section: "Verbal Ability", text: "Choose the correctly spelled word:", options: ["Receive", "Recieve", "Receeve", "Receiv"], answer: "Receive" },
+  { section: "Verbal Ability", text: "Choose the correct antonym for 'optimistic':", options: ["Pessimistic", "Hopeful", "Cheerful", "Positive"], answer: "Pessimistic" },
+  { section: "Verbal Ability", text: "Fill in the blank: This movie is ___ than the last one we watched.", options: ["better", "best", "more good", "most good"], answer: "better" },
+  { section: "Verbal Ability", text: "Choose the correct word: The teacher ___ explaining the lesson.", options: ["is", "are", "were", "have"], answer: "is" },
+  { section: "Verbal Ability", text: "What is the meaning of the idiom 'spill the beans'?", options: ["Reveal a secret", "Cook a meal", "Cause trouble", "Work hard"], answer: "Reveal a secret" },
+  { section: "Verbal Ability", text: "Rearrange the words to form a correct sentence: always / they / on / arrive / time", options: ["They always arrive on time", "They arrive on time always", "Always they arrive on time", "They on time always arrive"], answer: "They always arrive on time" },
+  { section: "Verbal Ability", text: "Choose the correct synonym for 'cautious':", options: ["Careful", "Reckless", "Careless", "Bold"], answer: "Careful" },
+  { section: "Verbal Ability", text: "Find the error: I doesn’t like to read books.", options: ["doesn’t → don’t", "like → likes", "to → too", "read → reading"], answer: "doesn’t → don’t" },
+  { section: "Technical Skills", text: "What is the output of this Python code: x = 7; print(x // 2)?", options: ["3", "3.5", "4", "2"], answer: "3" },
+  { section: "Technical Skills", text: "In SQL, which command is used to create a new table?", options: ["CREATE", "INSERT", "UPDATE", "DELETE"], answer: "CREATE" },
+  { section: "Technical Skills", text: "Which data structure is best for implementing a stack?", options: ["Array", "Queue", "HashMap", "Tree"], answer: "Array" },
+  { section: "Technical Skills", text: "What is the time complexity of bubble sort in the worst case?", options: ["O(n²)", "O(n)", "O(log n)", "O(1)"], answer: "O(n²)" },
+  { section: "Technical Skills", text: "Which of the following is a back-end technology?", options: ["Node.js", "HTML", "CSS", "JavaScript"], answer: "Node.js" },
+  { section: "Technical Skills", text: "What does 'HTML' stand for in web development?", options: ["HyperText Markup Language", "HyperText Model Language", "HighText Markup Language", "HyperTransfer Markup Language"], answer: "HyperText Markup Language" },
+  { section: "Technical Skills", text: "In Python, what is the output of: x = 4; print(x * 3)?", options: ["12", "8", "16", "10"], answer: "12" },
+  { section: "Technical Skills", text: "Which SQL command is used to sort the results of a query?", options: ["ORDER BY", "SELECT", "GROUP BY", "WHERE"], answer: "ORDER BY" },
+  { section: "Technical Skills", text: "What is a database schema?", options: ["The structure of a database", "A single table", "A database query", "A database record"], answer: "The structure of a database" },
+  { section: "Technical Skills", text: "Which protocol is used for file transfer over the internet?", options: ["FTP", "HTTP", "SMTP", "HTTPS"], answer: "FTP" }
+];
+
+    let currentQuestion = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let userName = "";
+    let timer;
+    let timeLeft = 30 * 60; // 30 minutes in seconds
+
+    function validateLogin() {
+      const name = document.getElementById("name-input").value.trim();
+      const password = document.getElementById("password-input").value;
+      const loginError = document.getElementById("login-error");
+      const today = new Date();
+      const expectedPassword = String(today.getDate()).padStart(2, "0") + 
+                              String(today.getMonth() + 1).padStart(2, "0") + 
+                              today.getFullYear();
+
+      if (name && password === expectedPassword) {
+        userName = name;
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("quiz-screen").classList.remove("hidden");
+        document.getElementById("welcome-message").textContent = `Welcome, ${userName}! This 50-question test assesses your aptitude for IT industry roles. Complete all questions within 30 minutes.`;
+        startTimer();
+        loadQuestion();
+      } else {
+        loginError.classList.remove("hidden");
+      }
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          submitTest();
+        }
+      }, 1000);
+    }
+
+    function loadQuestion() {
+      const question = questions[currentQuestion];
+      document.getElementById("section-title").textContent = question.section;
+      document.getElementById("question-text").textContent = `${currentQuestion + 1}. ${question.text}`;
+      const optionsContainer = document.getElementById("options-container");
+      optionsContainer.innerHTML = "";
+      question.options.forEach((option, index) => {
+        const optionDiv = document.createElement("div");
+        optionDiv.className = "option-container";
+        optionDiv.innerHTML = `
+          <input type="radio" name="option" id="option${index}" value="${option}" ${userAnswers[currentQuestion] === option ? "checked" : ""}>
+          <label for="option${index}">${option}</label>
+        `;
+        optionsContainer.appendChild(optionDiv);
+      });
+
+      document.getElementById("prev-btn").disabled = currentQuestion === 0;
+      document.getElementById("next-btn").textContent = currentQuestion === questions.length - 1 ? "Submit" : "Next";
+      document.getElementById("progress-bar-fill").style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+    }
+
+    function prevQuestion() {
+      saveAnswer();
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        loadQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      saveAnswer();
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        submitTest();
+      }
+    }
+
+    function saveAnswer() {
+      const selectedOption = document.querySelector("input[name='option']:checked");
+      if (selectedOption) {
+        userAnswers[currentQuestion] = selectedOption.value;
+      }
+    }
+
+    function submitTest() {
+      clearInterval(timer);
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("results-screen").classList.remove("hidden");
+
+      let totalScore = 0;
+      let quantitativeScore = 0;
+      let logicalScore = 0;
+      let verbalScore = 0;
+      let technicalScore = 0;
+      const improvementAreas = [];
+
+      userAnswers.forEach((answer, index) => {
+        if (answer === questions[index].answer) {
+          totalScore++;
+          if (questions[index].section === "Quantitative Aptitude") quantitativeScore++;
+          else if (questions[index].section === "Logical Reasoning") logicalScore++;
+          else if (questions[index].section === "Verbal Ability") verbalScore++;
+          else if (questions[index].section === "Technical Skills") technicalScore++;
+        }
+      });
+
+      if (quantitativeScore < 12) improvementAreas.push("Quantitative Aptitude: Practice problems involving ratios, percentages, and time/work.");
+      if (logicalScore < 12) improvementAreas.push("Logical Reasoning: Focus on series, coding-decoding, and analogies.");
+      if (verbalScore < 8) improvementAreas.push("Verbal Ability: Improve vocabulary and grammar through reading and practice.");
+      if (technicalScore < 8) improvementAreas.push("Technical Skills: Strengthen programming and database concepts.");
+
+      document.getElementById("total-score").textContent = `Total Score: ${totalScore} / 50`;
+      document.getElementById("quantitative-score").textContent = `Quantitative Aptitude Score: ${quantitativeScore} / 15`;
+      document.getElementById("logical-score").textContent = `Logical Reasoning Score: ${logicalScore} / 15`;
+      document.getElementById("verbal-score").textContent = `Verbal Ability Score: ${verbalScore} / 10`;
+      document.getElementById("technical-score").textContent = `Technical Skills Score: ${technicalScore} / 10`;
+      const improvementList = document.getElementById("improvement-areas");
+      improvementList.innerHTML = improvementAreas.length ? improvementAreas.map(area => `<li>${area}</li>`).join("") : "<li>Great job! No major areas for improvement.</li>";
+    }
+
+    function restartTest() {
+      currentQuestion = 0;
+      userAnswers = new Array(questions.length).fill(null);
+      timeLeft = 30 * 60;
+      document.getElementById("results-screen").classList.add("hidden");
+      document.getElementById("login-screen").classList.remove("hidden");
+      document.getElementById("name-input").value = "";
+      document.getElementById("password-input").value = "";
+      document.getElementById("login-error").classList.add("hidden");
+    }
+  </script>
+</body>
+</html>

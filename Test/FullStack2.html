@@ -1,0 +1,488 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack Aptitude Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #333 !important; /* Ensure readable text */
+            background-color: white !important; /* Explicit background */
+            visibility: visible !important; /* Ensure visibility */
+            opacity: 1 !important; /* Prevent transparency */
+            font-family: Arial, Helvetica, sans-serif; /* Fallback fonts */
+        }
+        .option:hover {
+            background-color: #e0e7ff !important;
+        }
+        .option.selected {
+            background-color: #4CAF50 !important;
+            color: white !important;
+        }
+        .option.correct {
+            background-color: #4CAF50 !important;
+            color: white !important;
+        }
+        .option.incorrect {
+            background-color: #f44336 !important;
+            color: white !important;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            display: none;
+        }
+        #result span {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Full-Stack Aptitude Test</h1>
+        <div id="quiz"></div>
+        <button id="nextBtn" onclick="nextQuestion()">Next</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+          const questions = [
+    {
+        question: "What does DOM stand for in web development?",
+        options: ["Document Object Model", "Data Object Model", "Dynamic Object Mapping", "Document Order Model"],
+        correct: 0
+    },
+    {
+        question: "Which CSS property sets the background color of an element?",
+        options: ["color", "background-color", "bg-color", "fill"],
+        correct: 1
+    },
+    {
+        question: "How do you declare a function in JavaScript?",
+        options: ["function myFunc()", "func myFunc()", "def myFunc()", "function:myFunc()"],
+        correct: 0
+    },
+    {
+        question: "Which HTTP method is used to send data to a server?",
+        options: ["GET", "POST", "PUT", "PATCH"],
+        correct: 1
+    },
+    {
+        question: "What is the role of a package.json file in Node.js?",
+        options: ["Store CSS styles", "Define project metadata and dependencies", "Run server scripts", "Manage database connections"],
+        correct: 1
+    },
+    {
+        question: "Which HTML tag defines an ordered list?",
+        options: ["<ul>", "<ol>", "<li>", "<list>"],
+        correct: 1
+    },
+    {
+        question: "What does the CSS `display: none` property do?",
+        options: ["Hides an element", "Shows an element", "Centers an element", "Rotates an element"],
+        correct: 0
+    },
+    {
+        question: "Which JavaScript method adds an element to the end of an array?",
+        options: ["push()", "pop()", "shift()", "unshift()"],
+        correct: 0
+    },
+    {
+        question: "What is Mongoose in the context of Node.js?",
+        options: ["A CSS framework", "An ODM for MongoDB", "A JavaScript testing library", "A routing library"],
+        correct: 1
+    },
+    {
+        question: "Which SQL command modifies existing data in a table?",
+        options: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        correct: 2
+    },
+    {
+        question: "What is the default port for MongoDB?",
+        options: ["27017", "3306", "5432", "8080"],
+        correct: 0
+    },
+    {
+        question: "Which HTML attribute specifies a unique identifier for an element?",
+        options: ["class", "id", "name", "type"],
+        correct: 1
+    },
+    {
+        question: "Which CSS property controls the spacing between lines of text?",
+        options: ["line-height", "letter-spacing", "word-spacing", "text-indent"],
+        correct: 0
+    },
+    {
+        question: "What does the JavaScript `filter` method do?",
+        options: ["Creates a new array with filtered elements", "Sorts an array", "Maps elements", "Removes duplicates"],
+        correct: 0
+    },
+    {
+        question: "What does API stand for?",
+        options: ["Application Program Interface", "Automated Process Integration", "Application Process Interface", "Advanced Programming Interface"],
+        correct: 0
+    },
+    {
+        question: "Which database type is PostgreSQL?",
+        options: ["NoSQL", "Relational", "Key-Value", "Graph"],
+        correct: 1
+    },
+    {
+        question: "What is the purpose of the HTML `<title>` tag?",
+        options: ["Set the page title", "Define a heading", "Embed a script", "Create a link"],
+        correct: 0
+    },
+    {
+        question: "Which CSS unit is relative to the viewport width?",
+        options: ["px", "em", "vw", "rem"],
+        correct: 2
+    },
+    {
+        question: "What does the JavaScript `await` keyword do?",
+        options: ["Pauses execution until a promise resolves", "Loops through arrays", "Declares a variable", "Stops a function"],
+        correct: 0
+    },
+    {
+        question: "Which HTTP status code indicates a resource not found?",
+        options: ["200", "404", "500", "403"],
+        correct: 1
+    },
+    {
+        question: "What is the purpose of a `.env` file?",
+        options: ["Store environment variables", "Define Git branches", "Track file changes", "Run Node.js scripts"],
+        correct: 0
+    },
+    {
+        question: "Which HTML element defines a submit button in a form?",
+        options: ["<button>", "<input>", "<submit>", "Both a and b"],
+        correct: 3
+    },
+    {
+        question: "What does the CSS `grid` property enable?",
+        options: ["Flexbox layout", "Grid layout", "Animation", "Text styling"],
+        correct: 1
+    },
+    {
+        question: "Which JavaScript method prevents the default behavior of an event?",
+        options: ["stopPropagation()", "preventDefault()", "cancelEvent()", "stopEvent()"],
+        correct: 1
+    },
+    {
+        question: "What is JSON in web development?",
+        options: ["A styling language", "A data interchange format", "A database system", "A JavaScript framework"],
+        correct: 1
+    },
+    {
+        question: "Which command installs dependencies in a Node.js project?",
+        options: ["node install", "npm install", "npm start", "node init"],
+        correct: 1
+    },
+    {
+        question: "What is the purpose of the HTML `<script>` tag?",
+        options: ["Embed JavaScript", "Style elements", "Create forms", "Define metadata"],
+        correct: 0
+    },
+    {
+        question: "Which CSS property sets the font style to italic?",
+        options: ["font-weight", "font-style", "text-decoration", "font-family"],
+        correct: 1
+    },
+    {
+        question: "What does the JavaScript `reduce` method do?",
+        options: ["Filters elements", "Creates a single value from an array", "Maps elements", "Sorts an array"],
+        correct: 1
+    },
+    {
+        question: "Which database is primarily used with NoSQL?",
+        options: ["MySQL", "PostgreSQL", "MongoDB", "SQLite"],
+        correct: 2
+    },
+    {
+        question: "What does OAuth stand for?",
+        options: ["Open Authorization", "Object Authentication", "Online Access", "Open Authentication"],
+        correct: 0
+    },
+    {
+        question: "Which HTML tag defines a table cell?",
+        options: ["<tr>", "<td>", "<th>", "<table>"],
+        correct: 1
+    },
+    {
+        question: "What is the CSS `overflow` property used for?",
+        options: ["Control text alignment", "Handle content that exceeds an element’s box", "Set font size", "Change border style"],
+        correct: 1
+    },
+    {
+        question: "Which JavaScript operator checks for inequality with type coercion?",
+        options: ["==", "===", "!=", "!=="],
+        correct: 2
+    },
+    {
+        question: "What is the purpose of a route in Express.js?",
+        options: ["Handle HTTP requests", "Style pages", "Manage databases", "Compile JavaScript"],
+        correct: 0
+    },
+    {
+        question: "Which SQL clause sorts query results?",
+        options: ["WHERE", "GROUP BY", "ORDER BY", "HAVING"],
+        correct: 2
+    },
+    {
+        question: "What is the default port for PostgreSQL?",
+        options: ["27017", "3306", "5432", "8080"],
+        correct: 2
+    },
+    {
+        question: "Which HTML attribute specifies the destination of a link?",
+        options: ["src", "href", "alt", "title"],
+        correct: 1
+    },
+    {
+        question: "What does the CSS `position: fixed` do?",
+        options: ["Positions relative to parent", "Fixes to viewport", "Removes from flow", "Aligns to center"],
+        correct: 1
+    },
+    {
+        question: "Which JavaScript method joins array elements into a string?",
+        options: ["split()", "join()", "slice()", "concat()"],
+        correct: 1
+    },
+    {
+        question: "What is the purpose of an HTTP header?",
+        options: ["Style a webpage", "Provide metadata about a request/response", "Store cookies", "Render HTML"],
+        correct: 1
+    },
+    {
+        question: "Which NoSQL database uses graph storage?",
+        options: ["Redis", "MongoDB", "Neo4j", "Cassandra"],
+        correct: 2
+    },
+    {
+        question: "What is the HTML `<body>` tag used for?",
+        options: ["Store metadata", "Define visible content", "Create navigation", "Embed scripts"],
+        correct: 1
+    },
+    {
+        question: "Which CSS property controls the visibility of an element?",
+        options: ["opacity", "display", "visibility", "color"],
+        correct: 2
+    },
+    {
+        question: "What does the JavaScript `setInterval` function do?",
+        options: ["Executes code once", "Repeats code at intervals", "Stops execution", "Parses JSON"],
+        correct: 1
+    },
+    {
+        question: "Which HTTP method deletes resources?",
+        options: ["GET", "POST", "PUT", "DELETE"],
+        correct: 3
+    },
+    {
+        question: "What is the purpose of Yarn in Node.js?",
+        options: ["Run JavaScript", "Manage packages", "Compile code", "Style pages"],
+        correct: 1
+    },
+    {
+        question: "Which HTML tag defines a paragraph?",
+        options: ["<p>", "<div>", "<span>", "<section>"],
+        correct: 0
+    },
+    {
+        question: "What does the CSS `border-radius` property control?",
+        options: ["Element size", "Corner roundness", "Text alignment", "Border thickness"],
+        correct: 1
+    },
+    {
+        question: "Which JavaScript event is triggered when a form is submitted?",
+        options: ["onclick", "onchange", "onsubmit", "onload"],
+        correct: 2
+    }
+];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadQuestion() {
+            const quizDiv = document.getElementById('quiz');
+            const q = questions[currentQuestion];
+            quizDiv.innerHTML = `
+                <div class="question">
+                    <div class="question-text">${currentQuestion + 1}. ${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((option, index) => `
+                            <div class="option" onclick="selectOption(${index})">${option}</div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Finish' : 'Next';
+            console.log(`Question ${currentQuestion + 1} loaded with options:`, q.options); // Debug log
+            answered = false;
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.remove('selected');
+                if (i === questions[currentQuestion].correct) {
+                    opt.classList.add('correct');
+                } else if (i === index && i !== questions[currentQuestion].correct) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            options[index].classList.add('selected');
+            if (index === questions[currentQuestion].correct) {
+                score++;
+            }
+            answered = true;
+        }
+
+        function nextQuestion() {
+            if (!answered && currentQuestion < questions.length) {
+                alert('Please select an option before proceeding.');
+                return;
+            }
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const quizDiv = document.getElementById('quiz');
+            const resultDiv = document.getElementById('result');
+            const nextBtn = document.getElementById('nextBtn');
+            quizDiv.style.display = 'none';
+            nextBtn.style.display = 'none';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `You scored <span>${score}</span> out of ${questions.length}!`;
+        }
+
+        // Load the first question
+        loadQuestion();
+    </script>
+</body>
+</html>

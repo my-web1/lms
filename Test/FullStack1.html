@@ -1,0 +1,464 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack Aptitude Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #333 !important; /* Ensure readable text */
+            background-color: white !important; /* Explicit background */
+            visibility: visible !important; /* Ensure visibility */
+            opacity: 1 !important; /* Prevent transparency */
+            font-family: Arial, Helvetica, sans-serif; /* Fallback fonts */
+        }
+        .option:hover {
+            background-color: #e0e7ff !important;
+        }
+        .option.selected {
+            background-color: #4CAF50 !important;
+            color: white !important;
+        }
+        .option.correct {
+            background-color: #4CAF50 !important;
+            color: white !important;
+        }
+        .option.incorrect {
+            background-color: #f44336 !important;
+            color: white !important;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            display: none;
+        }
+        #result span {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Full-Stack Aptitude Test</h1>
+        <div id="quiz"></div>
+        <button id="nextBtn" onclick="nextQuestion()">Next</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What does HTML stand for?",
+                options: ["Hyper Text Markup Language", "High Text Markup Language", "Hyper Tabular Markup Language", "None of these"],
+                correct: 0
+            },
+            {
+                question: "Which CSS property controls the text size?",
+                options: ["font-style", "text-size", "font-size", "text-style"],
+                correct: 2
+            },
+            {
+                question: "What is the correct JavaScript syntax to select an element by ID?",
+                options: ["document.getElement('id')", "document.getElementById('id')", "document.querySelector('#id')", "Both b and c"],
+                correct: 3
+            },
+            {
+                question: "Which HTTP method is typically used to retrieve data from a server?",
+                options: ["POST", "GET", "PUT", "DELETE"],
+                correct: 1
+            },
+            {
+                question: "What is the purpose of Node.js in full-stack development?",
+                options: ["To style web pages", "To manage databases", "To run JavaScript on the server", "To create animations"],
+                correct: 2
+            },
+            {
+                question: "Which HTML tag is used to define an unordered list?",
+                options: ["&lt;ol&gt;", "&lt;ul&gt;", "&lt;li&gt;", "&lt;list&gt;"],
+                correct: 1
+            },
+            {
+                question: "What does CSS stand for?",
+                options: ["Creative Style Sheets", "Cascading Style Sheets", "Computer Style Sheets", "Colorful Style Sheets"],
+                correct: 1
+            },
+            {
+                question: "Which JavaScript keyword declares a variable with block scope?",
+                options: ["var", "let", "const", "Both b and c"],
+                correct: 3
+            },
+            {
+                question: "What is the primary function of Express.js?",
+                options: ["Database management", "Server-side framework for Node.js", "Front-end rendering", "CSS preprocessing"],
+                correct: 1
+            },
+            {
+                question: "Which SQL command is used to retrieve data from a database?",
+                options: ["INSERT", "UPDATE", "SELECT", "DELETE"],
+                correct: 2
+            },
+            {
+                question: "What is the default port for HTTP?",
+                options: ["80", "443", "8080", "3000"],
+                correct: 0
+            },
+            {
+                question: "Which HTML attribute specifies an alternate text for an image?",
+                options: ["src", "alt", "title", "href"],
+                correct: 1
+            },
+            {
+                question: "Which CSS property is used to create space between elements?",
+                options: ["padding", "margin", "border", "spacing"],
+                correct: 1
+            },
+            {
+                question: "What does the JavaScript `map` method do?",
+                options: ["Removes elements", "Creates a new array with transformed elements", "Sorts an array", "Filters elements"],
+                correct: 1
+            },
+            {
+                question: "What is REST in the context of APIs?",
+                options: ["A database query language", "A front-end framework", "An architectural style for APIs", "A JavaScript library"],
+                correct: 2
+            },
+            {
+                question: "Which database type is MongoDB?",
+                options: ["Relational", "NoSQL", "Graph", "Key-Value"],
+                correct: 1
+            },
+            {
+                question: "What is the purpose of the `<meta>` tag in HTML?",
+                options: ["Define a paragraph", "Provide metadata about the document", "Create a hyperlink", "Embed JavaScript"],
+                correct: 1
+            },
+            {
+                question: "Which CSS unit is relative to the font size of the element?",
+                options: ["px", "em", "vw", "%"],
+                correct: 1
+            },
+            {
+                question: "What does the JavaScript `async` keyword do?",
+                options: ["Runs a function synchronously", "Marks a function as asynchronous", "Prevents errors", "Loops through arrays"],
+                correct: 1
+            },
+            {
+                question: "Which HTTP status code indicates a successful request?",
+                options: ["404", "500", "200", "301"],
+                correct: 2
+            },
+            {
+                question: "What is the purpose of a `.gitignore` file?",
+                options: ["Track changes in Git", "Ignore specified files in Git", "Store Git credentials", "Define Git branches"],
+                correct: 1
+            },
+            {
+                question: "Which HTML element is used for forms?",
+                options: ["<div>", "<form>", "<input>", "<section>"],
+                correct: 1
+            },
+            {
+                question: "What does the CSS `flex` property enable?",
+                options: ["Grid layout", "Flexible box layout", "Animation", "Text alignment"],
+                correct: 1
+            },
+            {
+                question: "Which JavaScript method stops event propagation?",
+                options: ["preventDefault()", "stopPropagation()", "stopEvent()", "cancelEvent()"],
+                correct: 1
+            },
+            {
+                question: "What is CORS in web development?",
+                options: ["A CSS framework", "A security policy for cross-origin requests", "A JavaScript library", "A database protocol"],
+                correct: 1
+            },
+            {
+                question: "Which command starts a Node.js application?",
+                options: ["node start", "npm run", "node app.js", "npm init"],
+                correct: 2
+            },
+            {
+                question: "What is the purpose of the HTML `<canvas>` element?",
+                options: ["Form creation", "Drawing graphics", "Embedding videos", "Styling text"],
+                correct: 1
+            },
+            {
+                question: "Which CSS property aligns items in a flex container?",
+                options: ["justify-content", "align-items", "flex-direction", "Both a and b"],
+                correct: 3
+            },
+            {
+                question: "What does the JavaScript `fetch` API do?",
+                options: ["Manipulates the DOM", "Makes HTTP requests", "Parses JSON", "Handles events"],
+                correct: 1
+            },
+            {
+                question: "Which database is primarily used with SQL?",
+                options: ["MongoDB", "Redis", "MySQL", "DynamoDB"],
+                correct: 2
+            },
+            {
+                question: "What does JWT stand for?",
+                options: ["JavaScript Web Token", "JSON Web Token", "Java Web Token", "JSON Widget Token"],
+                correct: 1
+            },
+            {
+                question: "Which HTML tag defines a table row?",
+                options: ["<td>", "<tr>", "<th>", "<table>"],
+                correct: 1
+            },
+            {
+                question: "What is the CSS `box-sizing` property used for?",
+                options: ["Setting font size", "Controlling element dimensions", "Animating elements", "Aligning text"],
+                correct: 1
+            },
+            {
+                question: "Which JavaScript operator checks for equality without type coercion?",
+                options: ["==", "===", "!=", "!=="],
+                correct: 1
+            },
+            {
+                question: "What is the purpose of a middleware in Express.js?",
+                options: ["Render HTML", "Handle database queries", "Process requests before routes", "Manage CSS"],
+                correct: 2
+            },
+            {
+                question: "Which SQL clause filters query results?",
+                options: ["SELECT", "WHERE", "ORDER BY", "GROUP BY"],
+                correct: 1
+            },
+            {
+                question: "What is the default port for HTTPS?",
+                options: ["80", "443", "8080", "3000"],
+                correct: 1
+            },
+            {
+                question: "Which HTML attribute makes an input field mandatory?",
+                options: ["required", "mandatory", "validate", "must"],
+                correct: 0
+            },
+            {
+                question: "What does the CSS `position: absolute` do?",
+                options: ["Positions relative to parent", "Removes element from flow", "Aligns to center", "Fixes to viewport"],
+                correct: 1
+            },
+            {
+                question: "Which JavaScript method converts a string to an array?",
+                options: ["slice()", "split()", "join()", "parse()"],
+                correct: 1
+            },
+            {
+                question: "What is the purpose of an API endpoint?",
+                options: ["Style a webpage", "Handle database migrations", "Define a specific route for requests", "Compile JavaScript"],
+                correct: 2
+            },
+            {
+                question: "Which NoSQL database uses key-value storage?",
+                options: ["MongoDB", "Redis", "Neo4j", "Cassandra"],
+                correct: 1
+            },
+            {
+                question: "What is the HTML `<head>` tag used for?",
+                options: ["Define content", "Store metadata and links", "Create navigation", "Embed images"],
+                correct: 1
+            },
+            {
+                question: "Which CSS property controls element transparency?",
+                options: ["visibility", "opacity", "display", "color"],
+                correct: 1
+            },
+            {
+                question: "What does the JavaScript `setTimeout` function do?",
+                options: ["Loops code", "Executes code after a delay", "Stops execution", "Parses JSON"],
+                correct: 1
+            },
+            {
+                question: "Which HTTP method updates existing resources?",
+                options: ["GET", "POST", "PUT", "DELETE"],
+                correct: 2
+            },
+            {
+                question: "What is the purpose of npm in Node.js?",
+                options: ["Run JavaScript", "Manage packages", "Compile code", "Style pages"],
+                correct: 1
+            },
+            {
+                question: "Which HTML tag embeds external content like videos?",
+                options: ["<embed>", "<iframe>", "<object>", "All of the above"],
+                correct: 3
+            },
+            {
+                question: "What does the CSS `z-index` property control?",
+                options: ["Element size", "Stacking order", "Text alignment", "Border thickness"],
+                correct: 1
+            },
+            {
+                question: "Which JavaScript event is triggered on a mouse click?",
+                options: ["onhover", "onclick", "onchange", "onload"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadQuestion() {
+            const quizDiv = document.getElementById('quiz');
+            const q = questions[currentQuestion];
+            quizDiv.innerHTML = `
+                <div class="question">
+                    <div class="question-text">${currentQuestion + 1}. ${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((option, index) => `
+                            <div class="option" onclick="selectOption(${index})">${option}</div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Finish' : 'Next';
+            console.log(`Question ${currentQuestion + 1} loaded with options:`, q.options); // Debug log
+            answered = false;
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.remove('selected');
+                if (i === questions[currentQuestion].correct) {
+                    opt.classList.add('correct');
+                } else if (i === index && i !== questions[currentQuestion].correct) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            options[index].classList.add('selected');
+            if (index === questions[currentQuestion].correct) {
+                score++;
+            }
+            answered = true;
+        }
+
+        function nextQuestion() {
+            if (!answered && currentQuestion < questions.length) {
+                alert('Please select an option before proceeding.');
+                return;
+            }
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const quizDiv = document.getElementById('quiz');
+            const resultDiv = document.getElementById('result');
+            const nextBtn = document.getElementById('nextBtn');
+            quizDiv.style.display = 'none';
+            nextBtn.style.display = 'none';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `You scored <span>${score}</span> out of ${questions.length}!`;
+        }
+
+        // Load the first question
+        loadQuestion();
+    </script>
+</body>
+</html>
