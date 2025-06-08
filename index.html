@@ -5,22 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IICP Login</title>
   <script>
-    // Dynamically load Auth0 SDK with fallback
+    // Dynamically load Auth0 SDK with fallback, retry, and timeout
     function loadAuth0SDK() {
       return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.auth0.com/js/auth0-spa-js/2.1.3/auth0-spa-js.production.js';
-        script.defer = true;
-        script.onload = resolve;
-        script.onerror = () => {
-          const fallbackScript = document.createElement('script');
-          fallbackScript.src = 'https://auth0-sdk-cdn.s3.amazonaws.com/auth0-spa-js/2.1.3/auth0-spa-js.production.js'; // Fallback URL
-          fallbackScript.defer = true;
-          fallbackScript.onload = resolve;
-          fallbackScript.onerror = () => reject(new Error('Failed to load Auth0 SDK from both primary and fallback URLs.'));
-          document.head.appendChild(fallbackScript);
-        };
-        document.head.appendChild(script);
+        const primaryUrl = 'https://cdn.auth0.com/js/auth0-spa-js/2.1.3/auth0-spa-js.production.js';
+        const fallbackUrl = 'https://auth0-sdk-cdn.s3.amazonaws.com/auth0-spa-js/2.1.3/auth0-spa-js.production.js';
+        let attempts = 0;
+        const maxAttempts = 2;
+        const timeout = 10000; // 10-second timeout
+
+        function loadScript(url) {
+          const script = document.createElement('script');
+          script.src = url;
+          script.defer = true;
+          const timer = setTimeout(() => {
+            script.remove();
+            if (attempts < maxAttempts) {
+              attempts++;
+              loadScript(attempts === 1 ? fallbackUrl : primaryUrl);
+            } else {
+              reject(new Error(`Timeout loading Auth0 SDK from ${url}`));
+            }
+          }, timeout);
+
+          script.onload = () => {
+            clearTimeout(timer);
+            resolve();
+          };
+          script.onerror = () => {
+            clearTimeout(timer);
+            script.remove();
+            attempts++;
+            if (attempts < maxAttempts) {
+              loadScript(attempts === 1 ? fallbackUrl : primaryUrl);
+            } else {
+              reject(new Error(`Failed to load Auth0 SDK from ${primaryUrl} and ${fallbackUrl}.`));
+            }
+          };
+          document.head.appendChild(script);
+        }
+
+        loadScript(primaryUrl);
       });
     }
   </script>
@@ -86,6 +111,11 @@
     .footer a:hover {
       text-decoration: underline;
     }
+    .error {
+      color: #dc2626;
+      margin-top: 1rem;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -93,6 +123,7 @@
     <div class="logo">IICP</div>
     <p class="tagline">Indian Institute of Computer Programming</p>
     <button id="login-btn" class="login-btn">Sign In with Auth0</button>
+    <p id="error-msg" class="error"></p>
     <p class="footer">
       Secured by <a href="https://auth0.com" target="_blank">Auth0</a>
     </p>
@@ -100,42 +131,49 @@
 
   <script defer>
     async function initAuth0() {
+      const errorMsg = document.getElementById('error-msg');
+      const loginBtn = document.getElementById('login-btn');
+
       try {
-        // Load Auth0 SDK
         await loadAuth0SDK();
 
         if (typeof createAuth0Client !== 'function') {
-          throw new Error('Auth0 SDK failed to load after retry. Please check your internet connection or contact support.');
+          throw new Error('Auth0 SDK failed to load. Please verify the SDK URLs or contact support.');
         }
 
         const auth0 = await createAuth0Client({
           domain: 'dev-5b7cwnck12qn276l.us.auth0.com',
           clientId: 'drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ',
           authorizationParams: {
-            redirect_uri: window.location.origin,
+            redirect_uri: window.location.origin + '/callback', // Ensure this matches Auth0 settings
             audience: 'https://dev-5b7cwnck12qn276l.us.auth0.com/api/v2/',
           },
         });
 
-        // Handle redirect callback after login
         if (location.search.includes('code=') && location.search.includes('state=')) {
           await auth0.handleRedirectCallback();
           window.location.href = 'https://lms.iicp.in/lms.html';
           return;
         }
 
-        // Check authentication status
         const isAuthenticated = await auth0.isAuthenticated();
         if (!isAuthenticated) {
-          document.getElementById('login-btn').addEventListener('click', async () => {
-            await auth0.loginWithRedirect();
+          loginBtn.addEventListener('click', async () => {
+            try {
+              await auth0.loginWithRedirect();
+            } catch (loginErr) {
+              errorMsg.textContent = 'Login failed: ' + (loginErr.message || 'Unknown error. Please try again.');
+              errorMsg.style.display = 'block';
+            }
           });
         } else {
-          alert('You are already logged in. Please log out first or use the Sign In button to authenticate again.');
+          errorMsg.textContent = 'You are already logged in. Please log out first or use the Sign In button to authenticate again.';
+          errorMsg.style.display = 'block';
         }
       } catch (err) {
         console.error('Auth0 Error:', err.message || err);
-        alert('An error occurred: ' + (err.message || 'Unknown error. Please check your internet connection or the CDN URL.'));
+        errorMsg.textContent = 'An error occurred: ' + (err.message || 'Unknown error. Please check your internet connection or contact support.');
+        errorMsg.style.display = 'block';
       }
     }
 
