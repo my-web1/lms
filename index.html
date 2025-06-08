@@ -20,6 +20,46 @@
             color: #2d3436;
         }
 
+        /* Loading screen styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 9999;
+        }
+
+        .loading-screen h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide main content initially */
+        .main-content {
+            display: none;
+        }
+
         .header {
             text-align: center;
             padding: 40px 20px;
@@ -210,6 +250,8 @@
             margin-top: 12px;
             transition: background 0.3s ease;
             font-weight: 500;
+            border: none;
+            cursor: pointer;
         }
 
         .button:hover {
@@ -286,162 +328,172 @@
 </head>
 
 <body>
-    <div class="header">
-        <h1>IICP LMS - INDUSTRY INTEGRATED CAREER PLATFORM</h1>
-        <p>Empowering Careers with Industry Integration</p>
-        <div class="contact-info">
-            <span><i class="fas fa-envelope"></i> info@iicp.com</span>
-            <a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a>
-            <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
-        </div>
+    <!-- Loading Screen (shown while checking authentication) -->
+    <div class="loading-screen" id="loadingScreen">
+        <h2>IICP LMS</h2>
+        <p>Authenticating...</p>
+        <div class="spinner"></div>
     </div>
 
-    <div class="container">
-        <div class="sidebar">
-            <!-- Auth0 Login/Logout/Profile UI -->
-            <div style="margin-bottom: 20px; text-align:center;">
-                <button id="login" class="button" style="width:100%; margin-bottom:8px;">Login</button>
-                <button id="logout" class="button" style="width:100%; margin-bottom:8px; display:none;">Logout</button>
-                <div id="profile" style="display:none; margin-top:12px;"></div>
-            </div>
-            <div class="sidebar-header">
-                <h2>IICP LMS</h2>
-                <p>Industry Integrated Career Platform</p>
-            </div>
-            <div class="tabs">
-                <div class="tab active" data-tab="job"><i class="fas fa-bell"></i> Job Alerts</div>
-                <div class="tab" data-tab="technical-tests"><i class="fas fa-vial"></i> Technical Tests</div>
-                <div class="tab" data-tab="interview"><i class="fas fa-microphone"></i> Interview Techniques</div>
-                <div class="tab" data-tab="online"><i class="fas fa-video"></i> Online/Virtual Interview</div>
-                <div class="tab" data-tab="body"><i class="fas fa-handshake"></i> Body Language</div>
-                <div class="tab" data-tab="technical"><i class="fas fa-code"></i> Technical Interview Q&A</div>
-                <div class="tab" data-tab="self"><i class="fas fa-user"></i> Self Introduction</div>
-                <div class="tab" data-tab="cv"><i class="fas fa-file-alt"></i> CV Builder</div>
-                <div class="tab" data-tab="hr"><i class="fas fa-question-circle"></i> HR Interview Questions</div>
+    <!-- Main Content (hidden until authenticated) -->
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <h1>IICP LMS - INDUSTRY INTEGRATED CAREER PLATFORM</h1>
+            <p>Empowering Careers with Industry Integration</p>
+            <div class="contact-info">
+                <span><i class="fas fa-envelope"></i> info@iicp.com</span>
+                <a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
             </div>
         </div>
 
-        <div class="content-area">
-            <div class="content active" id="job">
-                <h2><i class="fas fa-bell"></i> Job Alerts</h2>
-                <div class="link-list">
-                    <div class="link-item"><a href="#" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Channel</a></div>
-                    <div class="link-item"><a href="#" target="_blank"><i class="fab fa-telegram"></i> Telegram Channel</a></div>
+        <div class="container">
+            <div class="sidebar">
+                <!-- User Profile and Logout -->
+                <div style="margin-bottom: 20px; text-align:center;">
+                    <div id="profile" style="margin-bottom:12px;"></div>
+                    <button id="logout" class="button" style="width:100%;">Logout</button>
+                </div>
+                
+                <div class="sidebar-header">
+                    <h2>IICP LMS</h2>
+                    <p>Industry Integrated Career Platform</p>
+                </div>
+                <div class="tabs">
+                    <div class="tab active" data-tab="job"><i class="fas fa-bell"></i> Job Alerts</div>
+                    <div class="tab" data-tab="technical-tests"><i class="fas fa-vial"></i> Technical Tests</div>
+                    <div class="tab" data-tab="interview"><i class="fas fa-microphone"></i> Interview Techniques</div>
+                    <div class="tab" data-tab="online"><i class="fas fa-video"></i> Online/Virtual Interview</div>
+                    <div class="tab" data-tab="body"><i class="fas fa-handshake"></i> Body Language</div>
+                    <div class="tab" data-tab="technical"><i class="fas fa-code"></i> Technical Interview Q&A</div>
+                    <div class="tab" data-tab="self"><i class="fas fa-user"></i> Self Introduction</div>
+                    <div class="tab" data-tab="cv"><i class="fas fa-file-alt"></i> CV Builder</div>
+                    <div class="tab" data-tab="hr"><i class="fas fa-question-circle"></i> HR Interview Questions</div>
                 </div>
             </div>
 
-            <div class="content" id="technical-tests">
-                <h2><i class="fas fa-vial"></i> Technical Tests</h2>
-                <div class="link-list">
-                    <div class="link-item"><a href="Test/AptitudeTest1.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 1</a></div>
-                    <div class="link-item"><a href="Test/AptitudeTest2.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 2</a></div>
-                    <div class="link-item"><a href="Test/AptitudeTest3.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 3</a></div>
-                    <div class="link-item"><a href="Test/AptitudeTest4.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 4</a></div>
-                    <div class="link-item"><a href="Test/AptitudeTest5.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 5</a></div>
-                    <div class="link-item"><a href="Test/FullStack1.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 1</a></div>
-                    <div class="link-item"><a href="Test/FullStack2.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 2</a></div>
-                    <div class="link-item"><a href="Test/FullStack3.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 3</a></div>
-                    <div class="link-item"><a href="Test/FullStack4.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 4</a></div>
+            <div class="content-area">
+                <div class="content active" id="job">
+                    <h2><i class="fas fa-bell"></i> Job Alerts</h2>
+                    <div class="link-list">
+                        <div class="link-item"><a href="#" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Channel</a></div>
+                        <div class="link-item"><a href="#" target="_blank"><i class="fab fa-telegram"></i> Telegram Channel</a></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="interview">
-                <h2><i class="fas fa-microphone"></i> Interview Techniques</h2>
-                <div class="video-list">
-                    <div class="video-item"><a href="https://youtu.be/JOd5rX2m148?si=CjOcjOm_pgEB3Rrx" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 1</a></div>
-                    <div class="video-item"><a href="https://youtu.be/3VWSOQClYnA?si=dgYjwjGsZG46vdUC" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 2</a></div>
-                    <div class="video-item"><a href="https://youtu.be/-getF8lFXSA?si=XTF1JP7mD_LQJgjW" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 3</a></div>
-                    <div class="video-item"><a href="https://youtu.be/c16EqtkZncM?si=euegtP7xK51nUxqi" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 4</a></div>
+                <div class="content" id="technical-tests">
+                    <h2><i class="fas fa-vial"></i> Technical Tests</h2>
+                    <div class="link-list">
+                        <div class="link-item"><a href="Test/AptitudeTest1.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 1</a></div>
+                        <div class="link-item"><a href="Test/AptitudeTest2.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 2</a></div>
+                        <div class="link-item"><a href="Test/AptitudeTest3.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 3</a></div>
+                        <div class="link-item"><a href="Test/AptitudeTest4.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 4</a></div>
+                        <div class="link-item"><a href="Test/AptitudeTest5.html" target="_blank"><i class="fas fa-file-alt"></i> Aptitude Test 5</a></div>
+                        <div class="link-item"><a href="Test/FullStack1.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 1</a></div>
+                        <div class="link-item"><a href="Test/FullStack2.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 2</a></div>
+                        <div class="link-item"><a href="Test/FullStack3.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 3</a></div>
+                        <div class="link-item"><a href="Test/FullStack4.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 4</a></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="online">
-                <h2><i class="fas fa-video"></i> Online/Virtual Interview Techniques</h2>
-                <div class="video-list">
-                    <div class="video-item"><a href="https://youtu.be/yj10YZm2MMw?si=IzbxVj7YrtjFMs9r" target="_blank"><i class="fas fa-play-circle"></i> Virtual Interview Video 1</a></div>
-                    <div class="video-item"><a href="https://youtu.be/Svt1ZV_XcP8?si=4VDfcl5xJVAMf30v" target="_blank"><i class="fas fa-play-circle"></i> Virtual Interview Video 2</a></div>
+                <div class="content" id="interview">
+                    <h2><i class="fas fa-microphone"></i> Interview Techniques</h2>
+                    <div class="video-list">
+                        <div class="video-item"><a href="https://youtu.be/JOd5rX2m148?si=CjOcjOm_pgEB3Rrx" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 1</a></div>
+                        <div class="video-item"><a href="https://youtu.be/3VWSOQClYnA?si=dgYjwjGsZG46vdUC" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 2</a></div>
+                        <div class="video-item"><a href="https://youtu.be/-getF8lFXSA?si=XTF1JP7mD_LQJgjW" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 3</a></div>
+                        <div class="video-item"><a href="https://youtu.be/c16EqtkZncM?si=euegtP7xK51nUxqi" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 4</a></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="body">
-                <h2><i class="fas fa-handshake"></i> Body Language</h2>
-                <div class="video-list">
-                    <div class="video-item"><a href="https://youtu.be/r33vEVmjmTk?si=7R-PzG16C89_GnPb" target="_blank"><i class="fas fa-play-circle"></i> Body Language Video 1</a></div>
-                    <div class="video-item"><a href="https://youtu.be/thlJ8FPAS3E?si=U3YtWtrmQXwzu3tc" target="_blank"><i class="fas fa-play-circle"></i> Body Language Video 2</a></div>
+                <div class="content" id="online">
+                    <h2><i class="fas fa-video"></i> Online/Virtual Interview Techniques</h2>
+                    <div class="video-list">
+                        <div class="video-item"><a href="https://youtu.be/yj10YZm2MMw?si=IzbxVj7YrtjFMs9r" target="_blank"><i class="fas fa-play-circle"></i> Virtual Interview Video 1</a></div>
+                        <div class="video-item"><a href="https://youtu.be/Svt1ZV_XcP8?si=4VDfcl5xJVAMf30v" target="_blank"><i class="fas fa-play-circle"></i> Virtual Interview Video 2</a></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="technical">
-                <h2><i class="fas fa-code"></i> Technical Interview Questions & Answers</h2>
-                <div class="link-list">
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=aBhTDJ8y7Ec" target="_blank"><i class="fas fa-chart-bar"></i> Power BI Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=leiJoPlALf8" target="_blank"><i class="fas fa-vial"></i> Manual Testing Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=A3ZSv6IqXY8" target="_blank"><i class="fas fa-database"></i> Data Science Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=vp1m6YGKo9A" target="_blank"><i class="fas fa-leaf"></i> Spring Boot Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=4Ib9amXl4gI" target="_blank"><i class="fab fa-java"></i> Java Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=ruwx8R2nXyI" target="_blank"><i class="fab fa-node-js"></i> Node.js Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=331hkZcZxQc" target="_blank"><i class="fab fa-aws"></i> AWS DevOps Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=MxfLlmSofNc" target="_blank"><i class="fab fa-linux"></i> Linux Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=iY_lLEDyVW8" target="_blank"><i class="fas fa-money-bill-wave"></i> Financial Analyst Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=V5M925ZQEJU" target="_blank"><i class="fas fa-desktop"></i> System Design Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=oX5Y26O5dBE" target="_blank"><i class="fas fa-table"></i> SQL Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=ukaZwBPJZFs" target="_blank"><i class="fas fa-shield-alt"></i> SOC Analyst Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=y1sCHWOAZgU" target="_blank"><i class="fab fa-aws"></i> AWS Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=6W_867DF4vA" target="_blank"><i class="fab fa-css3-alt"></i> CSS Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=oeA3dskWKxE" target="_blank"><i class="fas fa-code"></i> C Programming Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=N-MbyH7EhoQ" target="_blank"><i class="fas fa-tools"></i> Data Engineer Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=L3uYTZ-4jqA" target="_blank"><i class="fas fa-file-excel"></i> Excel Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=jNbStxNKyCg" target="_blank"><i class="fas fa-server"></i> DBMS Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=MX48mv73jf8" target="_blank"><i class="fab fa-js"></i> JavaScript Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=tz1jSg8q650" target="_blank"><i class="fas fa-tasks"></i> Project Manager Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=9jaURNOC6vY" target="_blank"><i class="fas fa-robot"></i> Machine Learning Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=fJ8EAU87EFk" target="_blank"><i class="fab fa-python"></i> Django Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=CvUiEvw9RWQ" target="_blank"><i class="fab fa-java"></i> Java Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=v0el2gamx0Q" target="_blank"><i class="fas fa-lock"></i> Cyber Security Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=R_uqDROtXSk" target="_blank"><i class="fas fa-cubes"></i> OOPS Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=jlf12uVQcfE" target="_blank"><i class="fab fa-python"></i> Python Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=QEX9o7cWe9U" target="_blank"><i class="fas fa-chart-line"></i> Business Analyst Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=-rlv4MXg2Nk" target="_blank"><i class="fab fa-windows"></i> Azure Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=l5g38haVsJk" target="_blank"><i class="fas fa-globe"></i> Full Stack Developer Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=kjWwKQUJeVA" target="_blank"><i class="fas fa-code"></i> C++ Q&A</a></div>
-                    <div class="link-item"><a href="https://www.youtube.com/watch?v=oaq02pqYtew" target="_blank"><i class="fas fa-chart-pie"></i> Data Analyst Q&A</a></div>
+                <div class="content" id="body">
+                    <h2><i class="fas fa-handshake"></i> Body Language</h2>
+                    <div class="video-list">
+                        <div class="video-item"><a href="https://youtu.be/r33vEVmjmTk?si=7R-PzG16C89_GnPb" target="_blank"><i class="fas fa-play-circle"></i> Virtual Interview Video 1</a></div>
+                        <div class="video-item"><a href="https://youtu.be/thlJ8FPAS3E?si=U3YtWtrmQXwzu3tc" target="_blank"><i class="fas fa-play-circle"></i> Body Language Video 2</a></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="self">
-                <h2><i class="fas fa-user"></i> Self Introduction</h2>
-                <div class="template">
-                    <p><strong>Standard Template:</strong></p>
-                    <p>Hello, my name is [Your Name]. I am a [Your Profession/Role] with [X years] of experience in [Your Field/Industry]. I specialize in [Key Skills or Expertise]. I am passionate about [Your Interests or Career Goals], and I am excited to contribute to [Company/Team Name] by [Specific Contribution or Value].</p>
-                    <a href="#" class="button">Add External Resource</a>
+                <div class="content" id="technical">
+                    <h2><i class="fas fa-code"></i> Technical Interview Questions & Answers</h2>
+                    <div class="link-list">
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=aBhTDJ8y7Ec" target="_blank"><i class="fas fa-chart-bar"></i> Power BI Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=leiJoPlALf8" target="_blank"><i class="fas fa-vial"></i> Manual Testing Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=A3ZSv6IqXY8" target="_blank"><i class="fas fa-database"></i> Data Science Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=vp1m6YGKo9A" target="_blank"><i class="fas fa-leaf"></i> Spring Boot Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=4Ib9amXl4gI" target="_blank"><i class="fab fa-java"></i> Java Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=ruwx8R2nXyI" target="_blank"><i class="fab fa-node-js"></i> Node.js Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=331hkZcZxQc" target="_blank"><i class="fab fa-aws"></i> AWS DevOps Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=MxfLlmSofNc" target="_blank"><i class="fab fa-linux"></i> Linux Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=iY_lLEDyVW8" target="_blank"><i class="fas fa-money-bill-wave"></i> Financial Analyst Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=V5M925ZQEJU" target="_blank"><i class="fas fa-desktop"></i> System Design Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=oX5Y26O5dBE" target="_blank"><i class="fas fa-table"></i> SQL Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=ukaZwBPJZFs" target="_blank"><i class="fas fa-shield-alt"></i> SOC Analyst Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=y1sCHWOAZgU" target="_blank"><i class="fab fa-aws"></i> AWS Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=6W_867DF4vA" target="_blank"><i class="fab fa-css3-alt"></i> CSS Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=oeA3dskWKxE" target="_blank"><i class="fas fa-code"></i> C Programming Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=N-MbyH7EhoQ" target="_blank"><i class="fas fa-tools"></i> Data Engineer Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=L3uYTZ-4jqA" target="_blank"><i class="fas fa-file-excel"></i> Excel Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=jNbStxNKyCg" target="_blank"><i class="fas fa-server"></i> DBMS Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=MX48mv73jf8" target="_blank"><i class="fab fa-js"></i> JavaScript Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=tz1jSg8q650" target="_blank"><i class="fas fa-tasks"></i> Project Manager Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=9jaURNOC6vY" target="_blank"><i class="fas fa-robot"></i> Machine Learning Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=fJ8EAU87EFk" target="_blank"><i class="fab fa-python"></i> Django Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=CvUiEvw9RWQ" target="_blank"><i class="fab fa-java"></i> Java Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=v0el2gamx0Q" target="_blank"><i class="fas fa-lock"></i> Cyber Security Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=R_uqDROtXSk" target="_blank"><i class="fas fa-cubes"></i> OOPS Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=jlf12uVQcfE" target="_blank"><i class="fab fa-python"></i> Python Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=QEX9o7cWe9U" target="_blank"><i class="fas fa-chart-line"></i> Business Analyst Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=-rlv4MXg2Nk" target="_blank"><i class="fab fa-windows"></i> Azure Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=l5g38haVsJk" target="_blank"><i class="fas fa-globe"></i> Full Stack Developer Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=kjWwKQUJeVA" target="_blank"><i class="fas fa-code"></i> C++ Q&A</a></div>
+                        <div class="link-item"><a href="https://www.youtube.com/watch?v=oaq02pqYtew" target="_blank"><i class="fas fa-chart-pie"></i> Data Analyst Q&A</a></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="cv">
-                <h2><i class="fas fa-file-alt"></i> CV Builder & Templates</h2>
-                <div class="template">
-                    <p>Explore professional CV formats to enhance your job applications.</p>
-                    <a href="#" class="button">CV Formats</a>
+                <div class="content" id="self">
+                    <h2><i class="fas fa-user"></i> Self Introduction</h2>
+                    <div class="template">
+                        <p><strong>Standard Template:</strong></p>
+                        <p>Hello, my name is [Your Name]. I am a [Your Profession/Role] with [X years] of experience in [Your Field/Industry]. I specialize in [Key Skills or Expertise]. I am passionate about [Your Interests or Career Goals], and I am excited to contribute to [Company/Team Name] by [Specific Contribution or Value].</p>
+                        <a href="#" class="button">Add External Resource</a>
+                    </div>
                 </div>
-            </div>
 
-            <div class="content" id="hr">
-                <h2><i class="fas fa-question-circle"></i> HR Interview Questions</h2>
-                <div class="template">
-                    <p><strong>Standard Template:</strong></p>
-                    <p>1. Tell me about yourself.<br>
-                        2. What are your strengths and weaknesses?<br>
-                        3. Why do you want to work with us?<br>
-                        4. Where do you see yourself in 5 years?<br>
-                        5. Describe a challenging situation and how you handled it.</p>
-                    <a href="#" class="button">Add External Resource</a>
+                <div class="content" id="cv">
+                    <h2><i class="fas fa-file-alt"></i> CV Builder & Templates</h2>
+                    <div class="template">
+                        <p>Explore professional CV formats to enhance your job applications.</p>
+                        <a href="#" class="button">CV Formats</a>
+                    </div>
+                </div>
+
+                <div class="content" id="hr">
+                    <h2><i class="fas fa-question-circle"></i> HR Interview Questions</h2>
+                    <div class="template">
+                        <p><strong>Standard Template:</strong></p>
+                        <p>1. Tell me about yourself.<br>
+                            2. What are your strengths and weaknesses?<br>
+                            3. Why do you want to work with us?<br>
+                            4. Where do you see yourself in 5 years?<br>
+                            5. Describe a challenging situation and how you handled it.</p>
+                        <a href="#" class="button">Add External Resource</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="footer">
-        <p>Dr. Sachin Ambekar's IICP - Join Dr. Sachin Ambekar's IICP - Industry Integrated Career Platform to bridge the gap between education and industry.</p>
+        <div class="footer">
+            <p>Dr. Sachin Ambekar's IICP - Join Dr. Sachin Ambekar's IICP - Industry Integrated Career Platform to bridge the gap between education and industry.</p>
+        </div>
     </div>
 
     <!-- Auth0 SPA SDK -->
@@ -461,7 +513,7 @@
             });
         });
 
-        // Auth0 Integration
+        // Auth0 Integration with Initial Authentication Check
         auth0.createAuth0Client({
             domain: "dev-5b7cwnck12qn276l.us.auth0.com",
             clientId: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
@@ -469,20 +521,12 @@
                 redirect_uri: window.location.origin
             }
         }).then(async (auth0Client) => {
-            const loginButton = document.getElementById("login");
+            const loadingScreen = document.getElementById("loadingScreen");
+            const mainContent = document.getElementById("mainContent");
             const logoutButton = document.getElementById("logout");
             const profileElement = document.getElementById("profile");
 
-            loginButton.addEventListener("click", (e) => {
-                e.preventDefault();
-                auth0Client.loginWithRedirect();
-            });
-
-            logoutButton.addEventListener("click", (e) => {
-                e.preventDefault();
-                auth0Client.logout();
-            });
-
+            // Handle redirect callback if coming back from Auth0
             if (location.search.includes("state=") &&
                 (location.search.includes("code=") ||
                     location.search.includes("error="))) {
@@ -490,23 +534,45 @@
                 window.history.replaceState({}, document.title, "/");
             }
 
+            // Check authentication status
             const isAuthenticated = await auth0Client.isAuthenticated();
-            const userProfile = isAuthenticated ? await auth0Client.getUser() : null;
 
             if (isAuthenticated) {
-                loginButton.style.display = "none";
-                logoutButton.style.display = "block";
-                profileElement.style.display = "block";
+                // User is authenticated - show main content
+                const userProfile = await auth0Client.getUser();
+                
+                // Hide loading screen and show main content
+                loadingScreen.style.display = "none";
+                mainContent.style.display = "block";
+
+                // Display user profile
                 profileElement.innerHTML = `
-                    <p>${userProfile.name}</p>
-                    <img src="${userProfile.picture}" style="width:60px;border-radius:50%;margin-top:8px;" />
+                    <p style="margin-bottom: 8px; font-weight: 500;">${userProfile.name}</p>
+                    <img src="${userProfile.picture}" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                 `;
+
+                // Setup logout functionality
+                logoutButton.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    auth0Client.logout({
+                        logoutParams: {
+                            returnTo: window.location.origin
+                        }
+                    });
+                });
+
             } else {
-                loginButton.style.display = "block";
-                logoutButton.style.display = "none";
-                profileElement.style.display = "none";
-                profileElement.innerHTML = "";
+                // User is not authenticated - redirect to Auth0 login immediately
+                auth0Client.loginWithRedirect();
             }
+        }).catch(error => {
+            console.error('Auth0 initialization error:', error);
+            // Hide loading screen and show an error message
+            document.getElementById("loadingScreen").innerHTML = `
+                <h2>Authentication Error</h2>
+                <p>Unable to initialize authentication. Please refresh the page.</p>
+                <button onclick="window.location.reload()" class="button">Retry</button>
+            `;
         });
     </script>
 </body>
