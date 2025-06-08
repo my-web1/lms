@@ -1,0 +1,399 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Interview Guide - IICP LMS</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #e6e9ff 0%, #d1d8ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(90deg, #4b6cb7, #182848);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0.3;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        header p {
+            font-size: 1.2em;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-heading {
+            font-size: 1.8em;
+            color: #182848;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background: #4b6cb7;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        ul {
+            list-style: disc;
+            padding-left: 20px;
+            color: #555;
+            margin: 10px 0;
+        }
+        ul li {
+            margin-bottom: 8px;
+        }
+        .tip-box {
+            background: #e6f3ff;
+            border-left: 4px solid #4b6cb7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .tip-box p {
+            color: #333;
+        }
+
+        /* Tab Styles */
+        .tab-container {
+            margin: 20px 0;
+        }
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            background: #4b6cb7;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+        .tab-button:hover {
+            background: #182848;
+        }
+        .tab-button.active {
+            background: #182848;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #e5e7eb;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .question {
+            font-weight: bold;
+            color: #182848;
+            margin-bottom: 10px;
+        }
+        .answer {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* Hover Effects */
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: #4b6cb7;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .cta-button:hover {
+            background: #182848;
+        }
+
+        /* Footer Styles */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background: #182848;
+            color: white;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        footer p {
+            color: white;
+        }
+        footer a {
+            color: #a3bffa;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            header p {
+                font-size: 1em;
+            }
+            .section-heading {
+                font-size: 1.5em;
+            }
+            .container {
+                padding: 20px;
+            }
+            .tab-button {
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <h1>IICP LMS - Industry Integrated Career Platform</h1>
+            <p>Empowering Careers with Industry Integration</p>
+        </header>
+
+        <!-- Introduction Section -->
+        <section class="section">
+            <h2 class="section-heading">Mastering HR Interviews with IICP LMS</h2>
+            <p>
+                HR interviews assess your personality, cultural fit, and motivation, critical for computer science graduates (BE, BCA, MCA, BTech) aiming for tech roles. This IICP LMS guide provides a tab-based questionnaire with common HR questions and ideal answers, along with strategies to shine. Use these insights to prepare for HR rounds and enhance your personal introduction page!
+            </p>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Practice these answers using the STAR method (Situation, Task, Action, Result) to sound structured and confident.</p>
+            </div>
+        </section>
+
+        <!-- HR Interview Questionnaire -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">HR Interview Questionnaire</h2>
+            <p>Explore common HR questions and ideal answers below. Click each tab to view the question, ideal response, and tips for tailoring your answer.</p>
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="openTab(1)">Tell Me About Yourself</button>
+                    <button class="tab-button" onclick="openTab(2)">Strengths and Weaknesses</button>
+                    <button class="tab-button" onclick="openTab(3)">Why This Company?</button>
+                    <button class="tab-button" onclick="openTab(4)">Career Goals</button>
+                    <button class="tab-button" onclick="openTab(5)">Handling Challenges</button>
+                </div>
+                <div id="tab-1" class="tab-content active">
+                    <div class="question">Q: Tell me about yourself.</div>
+                    <div class="answer">
+                        <strong>Ideal Answer:</strong> I’m a BTech Computer Science graduate from [University Name] with a passion for software development. I’ve built projects like an e-commerce platform using React and Node.js, achieving 95% uptime. Growing up in a family of educators, I developed a strong work ethic and love for problem-solving. I’m excited to contribute my skills in [specific role, e.g., full-stack development] to innovative teams.<br>
+                        <strong>Why It Works:</strong> This answer covers education, skills, a key achievement, personal background, and enthusiasm for the role in a concise manner.<br>
+                        <strong>Tip:</strong> Tailor your answer to the job role, keep it under 2 minutes, and practice to sound natural.
+                    </div>
+                </div>
+                <div id="tab-2" class="tab-content">
+                    <div class="question">Q: What are your strengths and weaknesses?</div>
+                    <div class="answer">
+                        <strong>Ideal Answer:</strong> My strength is my ability to learn quickly and adapt to new technologies. For example, I self-taught Django in two weeks to build a project for a hackathon, winning 1st place. My weakness is that I sometimes focus too much on details, but I’ve been working on prioritizing tasks by setting clear milestones, which has improved my efficiency.<br>
+                        <strong>Why It Works:</strong> It highlights a relevant strength with an example and addresses a weakness with a proactive solution.<br>
+                        <strong>Tip:</strong> Choose a weakness that’s not critical to the job and show how you’re improving.
+                    </div>
+                </div>
+                <div id="tab-3" class="tab-content">
+                    <div class="question">Q: Why do you want to work for this company?</div>
+                    <div class="answer">
+                        <strong>Ideal Answer:</strong> I’m drawn to [Company Name] because of its innovative work in [specific area, e.g., AI-driven solutions], which aligns with my passion for machine learning. Your commitment to [specific value, e.g., sustainability or employee growth] resonates with me. I’d love to contribute my skills in Python and TensorFlow to your team and grow as a professional.<br>
+                        <strong>Why It Works:</strong> It shows research into the company’s mission and connects personal goals to the company’s values.<br>
+                        <strong>Tip:</strong> Research the company’s products, culture, and recent news to personalize your answer.
+                    </div>
+                </div>
+                <div id="tab-4" class="tab-content">
+                    <div class="question">Q: Where do you see yourself in 5 years?</div>
+                    <div class="answer">
+                        <strong>Ideal Answer:</strong> In five years, I see myself as a skilled [specific role, e.g., Senior Software Engineer], leading projects that solve real-world problems. I aim to deepen my expertise in [specific skill, e.g., cloud computing] and contribute to innovative solutions at a company like yours. I also plan to mentor junior developers to give back to the community.<br>
+                        <strong>Why It Works:</strong> It shows ambition, alignment with the company’s goals, and a desire to grow.<br>
+                        <strong>Tip:</strong> Focus on professional growth and contributions to the company, not personal goals.
+                    </div>
+                </div>
+                <div id="tab-5" class="tab-content">
+                    <div class="question">Q: Describe a challenge you faced and how you handled it.</div>
+                    <div class="answer">
+                        <strong>Ideal Answer:</strong> In my final-year project, our team struggled with integrating a payment gateway due to API issues. I took the initiative to research the documentation, collaborated with the team to debug the code, and implemented a fallback solution, ensuring the project was completed on time with full functionality. This taught me the importance of teamwork and persistence.<br>
+                        <strong>Why It Works:</strong> It uses the STAR method to clearly outline the situation, action, and result.<br>
+                        <strong>Tip:</strong> Choose a professional or academic challenge and highlight skills like problem-solving or leadership.
+                    </div>
+                </div>
+            </div>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Practice these answers aloud, adapting them to your experiences, and keep responses concise (1-2 minutes).</p>
+            </div>
+        </section>
+
+        <!-- Preparation Strategies -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Strategies for HR Interview Success</h2>
+            <p>HR interviews require preparation beyond technical skills. Use these strategies to excel:</p>
+            <ul>
+                <li><strong>Use the STAR Method:</strong> Structure answers to behavioral questions with Situation, Task, Action, and Result for clarity.</li>
+                <li><strong>Research the Company:</strong> Study the company’s mission, values, and recent achievements to show genuine interest.</li>
+                <li><strong>Showcase Soft Skills:</strong> Highlight teamwork, communication, and adaptability through examples from projects or internships.</li>
+                <li><strong>Incorporate Personal Story:</strong> Briefly mention family background or achievements to make your answers memorable (e.g., “My family’s support fueled my drive to win a coding competition”).</li>
+                <li><strong>Prepare Questions:</strong> Ask the interviewer about team culture, growth opportunities, or recent projects to show engagement.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Record yourself practicing answers to improve tone, pacing, and confidence.</p>
+            </div>
+        </section>
+
+        <!-- Enhance Your Introduction Page -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Enhance Your Introduction Page</h2>
+            <p>Incorporate HR interview insights into your personal webpage to impress recruiters:</p>
+            <ul>
+                <li><strong>About Me:</strong> Add a sentence about your family background or motivation (e.g., “Inspired by my parents’ dedication, I pursue excellence in tech”).</li>
+                <li><strong>Achievements Section:</strong> List key accomplishments like hackathon wins or certifications with quantifiable results.</li>
+                <li><strong>Skills:</strong> Highlight soft skills like communication or leadership alongside technical skills.</li>
+                <li><strong>Design:</strong> Use HTML and CSS for a clean, professional look, and host on GitHub Pages or Netlify.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Include a link to your webpage in your resume and LinkedIn to showcase your preparation.</p>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="section text-center">
+            <h2 class="section-heading">Ace Your HR Interview with IICP LMS!</h2>
+            <p>Prepare for HR rounds with confidence using IICP LMS. Practice these questions, refine your story, and land your dream tech job!</p>
+            <a href="#" class="cta-button">Explore IICP LMS Resources</a>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>IICP LMS - Industry Integrated Career Platform</p>
+            <p>Empowering Careers with Industry Integration</p>
+            <p><a href="#">LeetCode</a> | <a href="#">HackerRank</a> | <a href="#">InterviewBit</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function openTab(tabNumber) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            // Show selected tab content
+            document.getElementById(`tab-${tabNumber}`).classList.add('active');
+            // Add active class to clicked button
+            document.querySelector(`.tab-buttons button:nth-child(${tabNumber})`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
