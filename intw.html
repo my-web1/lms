@@ -1,0 +1,363 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Preparation Guide - IICP LMS</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #e6e9ff 0%, #d1d8ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(90deg, #4b6cb7, #182848);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0.3;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        header p {
+            font-size: 1.2em;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-heading {
+            font-size: 1.8em;
+            color: #182848;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background: #4b6cb7;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        ul {
+            list-style: disc;
+            padding-left: 20px;
+            color: #555;
+            margin: 10px 0;
+        }
+        ul li {
+            margin-bottom: 8px;
+        }
+        .tip-box {
+            background: #e6f3ff;
+            border-left: 4px solid #4b6cb7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .tip-box p {
+            color: #333;
+        }
+
+        /* Hover Effects */
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: #4b6cb7;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .cta-button:hover {
+            background: #182848;
+        }
+
+        /* Footer Styles */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background: #182848;
+            color: white;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        footer p {
+            color: white;
+        }
+        footer a {
+            color: #a3bffa;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            header p {
+                font-size: 1em;
+            }
+            .section-heading {
+                font-size: 1.5em;
+            }
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <h1>IICP LMS - Industry Integrated Career Platform</h1>
+            <p>Empowering Careers with Industry Integration</p>
+        </header>
+
+        <!-- Introduction Section -->
+        <section class="section">
+            <h2 class="section-heading">Why Prepare with IICP LMS?</h2>
+            <p>
+                As a computer science student (BE, BCA, MCA, BTech), mastering interview preparation is key to landing your dream tech job. This IICP LMS guide provides a comprehensive roadmap, covering resume building, technical and behavioral skills, personal branding, and more. Learn how to showcase your family background, achievements, and effective techniques to stand out!
+            </p>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Create a personal introduction webpage to highlight your skills, projects, and unique story. It’s a game-changer for recruiters!</p>
+            </div>
+        </section>
+
+        <!-- Step 1: Craft a Winning Resume -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 1: Craft a Winning Resume</h2>
+            <p>Your resume is your first impression. Keep it concise (1 page) and tailored to the job role.</p>
+            <ul>
+                <li><strong>Contact Info:</strong> Include name, email, phone, LinkedIn, and GitHub.</li>
+                <li><strong>Education:</strong> List your degree (e.g., BTech in Computer Science), university, and CGPA (if above 7.5/10).</li>
+                <li><strong>Skills:</strong> Highlight relevant skills (e.g., Python, Java, React, AWS).</li>
+                <li><strong>Projects:</strong> Showcase 2-3 projects with technologies used and impact (e.g., “Built an e-commerce site with 95% uptime”).</li>
+                <li><strong>Experience:</strong> Include internships, freelance work, or open-source contributions.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Use action verbs like “developed,” “optimized,” or “implemented” to make achievements pop.</p>
+            </div>
+        </section>
+
+        <!-- Step 2: Incorporate Family Background -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 2: Incorporate Family Background</h2>
+            <p>Sharing your family background in interviews (when relevant) can humanize your story and highlight your motivation.</p>
+            <ul>
+                <li><strong>Relevance:</strong> Briefly mention your background if it ties to your career choice (e.g., “Growing up in a family of educators inspired my passion for problem-solving”).</li>
+                <li><strong>Webpage Integration:</strong> Add a sentence in your “About Me” section, e.g., “Coming from a small-town family, I developed resilience and a strong work ethic.”</li>
+                <li><strong>Behavioral Questions:</strong> Use your background to answer questions like “What drives you?” or “How do you handle challenges?”</li>
+                <li><strong>Authenticity:</strong> Be genuine and concise; avoid oversharing personal details.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Practice a 1-2 sentence summary of your background to share naturally during interviews.</p>
+            </div>
+        </section>
+
+        <!-- Step 3: Highlight Achievements -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 3: Highlight Achievements</h2>
+            <p>Achievements showcase your skills and dedication. Include them in your resume, webpage, and interview answers.</p>
+            <ul>
+                <li><strong>Academic:</strong> Mention high CGPA, scholarships, or awards (e.g., “Received Dean’s List for 3 semesters”).</li>
+                <li><strong>Technical:</strong> Highlight hackathon wins, coding competition ranks, or certifications (e.g., “Ranked top 5% in HackerRank”).</li>
+                <li><strong>Projects:</strong> Quantify impact (e.g., “Developed an app with 1,000+ downloads”).</li>
+                <li><strong>Webpage:</strong> Create an “Achievements” section on your introduction page with bullet points or badges.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Use numbers to make achievements concrete (e.g., “Improved app performance by 30%”).</p>
+            </div>
+        </section>
+
+        <!-- Step 4: Master Technical Skills -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 4: Master Technical Skills</h2>
+            <p>Technical interviews test coding and problem-solving. Focus on these areas:</p>
+            <ul>
+                <li><strong>Data Structures & Algorithms:</strong> Practice arrays, linked lists, trees, graphs, sorting, and searching.</li>
+                <li><strong>Coding Practice:</strong> Solve 100+ medium/hard problems on LeetCode or HackerRank.</li>
+                <li><strong>Core Subjects:</strong> Revise OS, DBMS, Networking, and OOP concepts.</li>
+                <li><strong>System Design:</strong> Learn basics like REST APIs and database design for senior roles.</li>
+                <li><strong>Projects:</strong> Explain your project’s architecture and challenges in detail.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Verbalize your thought process during coding to demonstrate clarity.</p>
+            </div>
+        </section>
+
+        <!-- Step 5: Excel in Behavioral Interviews -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 5: Excel in Behavioral Interviews</h2>
+            <p>Behavioral questions assess soft skills and fit. Use the STAR method (Situation, Task, Action, Result).</p>
+            <ul>
+                <li><strong>Common Questions:</strong> Prepare for “Tell me about yourself,” “Strengths and weaknesses,” and “Why this company?”</li>
+                <li><strong>Teamwork:</strong> Share examples from group projects or hackathons.</li>
+                <li><strong>Challenges:</strong> Discuss a problem you solved and its impact.</li>
+                <li><strong>Research:</strong> Study the company’s mission, products, and recent news.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Practice answers aloud to sound confident and natural.</p>
+            </div>
+        </section>
+
+        <!-- Step 6: Use Effective Techniques -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 6: Use Effective Techniques</h2>
+            <p>Adopt proven strategies to boost your interview performance and preparation efficiency.</p>
+            <ul>
+                <li><strong>Time Management:</strong> Create a study schedule (e.g., 2 hours daily for coding, 1 hour for behavioral practice).</li>
+                <li><strong>Mock Interviews:</strong> Use platforms like Pramp or practice with peers to simulate real interviews.</li>
+                <li><strong>Feedback Loop:</strong> Record practice sessions to identify areas for improvement.</li>
+                <li><strong>Mindset:</strong> Stay positive and treat rejections as learning opportunities.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Break down complex problems into smaller steps during interviews to stay calm and focused.</p>
+            </div>
+        </section>
+
+        <!-- Step 7: Build a Personal Introduction Page -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 7: Build a Personal Introduction Page</h2>
+            <p>A personal webpage sets you apart by showcasing your skills, projects, and story.</p>
+            <ul>
+                <li><strong>Sections:</strong> Include About Me (with family background), Education, Skills, Projects, Achievements, and Contact.</li>
+                <li><strong>Design:</strong> Use HTML and CSS for a clean, professional look.</li>
+                <li><strong>Content:</strong> Add a headshot, project links, and a downloadable resume.</li>
+                <li><strong>Hosting:</strong> Deploy on GitHub Pages or Netlify for free.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Include your webpage link in your resume and LinkedIn for maximum impact.</p>
+            </div>
+        </section>
+
+        <!-- Step 8: Follow Up After Interviews -->
+        <section class="section hover-scale">
+            <h2 class="section-heading">Step 8: Follow Up After Interviews</h2>
+            <p>Following up shows professionalism and enthusiasm.</p>
+            <ul>
+                <li><strong>Thank-You Email:</strong> Send a concise email within 24 hours, thanking the interviewer and reiterating interest.</li>
+                <li><strong>Reflect:</strong> Note strengths and areas for improvement.</li>
+                <li><strong>Stay Connected:</strong> Connect on LinkedIn if appropriate.</li>
+            </ul>
+            <div class="tip-box">
+                <p><strong>Tip:</strong> Personalize your thank-you email by referencing a specific discussion from the interview.</p>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="section text-center">
+            <h2 class="section-heading">Launch Your Career with IICP LMS!</h2>
+            <p>Start your interview preparation today with IICP LMS. Build your skills, showcase your achievements, and land your dream tech job!</p>
+            <a href="#" class="cta-button">Explore IICP LMS Resources</a>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>IICP LMS - Industry Integrated Career Platform</p>
+            <p>Empowering Careers with Industry Integration</p>
+            <p><a href="#">LeetCode</a> | <a href="#">HackerRank</a> | <a href="#">InterviewBit</a></p>
+        </footer>
+    </div>
+</body>
+</html>
