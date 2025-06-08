@@ -1,116 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IICP Login</title>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1.3/auth0-spa-js.production.js" defer></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    .login-container {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      padding: 2rem;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
-    }
-    .logo {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #1e3a8a;
-      margin-bottom: 1rem;
-      letter-spacing: 2px;
-    }
-    .tagline {
-      font-size: 1rem;
-      color: #4b5563;
-      margin-bottom: 2rem;
-    }
-    .login-btn {
-      background: #1e3a8a;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.3s ease;
-    }
-    .login-btn:hover {
-      background: #1e40af;
-    }
-    .footer {
-      margin-top: 1.5rem;
-      font-size: 0.85rem;
-      color: #6b7280;
-    }
-    .footer a {
-      color: #1e3a8a;
-      text-decoration: none;
-    }
-    .footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IICP LMS Login</title>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .login-container {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #userProfile {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="logo">IICP</div>
-    <p class="tagline">Indian Institute of Computer Programming</p>
-    <button id="login-btn" class="login-btn">Sign In with Auth0</button>
-    <p class="footer">
-      Secured by <a href="https://auth0.com" target="_blank">Auth0</a>
-    </p>
-  </div>
+    <div class="login-container">
+        <h2>IICP LMS Login</h2>
+        <button id="loginButton" onclick="login()">Login</button>
+        <button id="logoutButton" onclick="logout()" style="display: none;">Logout</button>
+        <div id="userProfile"></div>
+    </div>
 
-  <script defer>
-    async function initAuth0() {
-      try {
-        const auth0 = await createAuth0Client({
-          domain: 'dev-5b7cwnck12qn276l.us.auth0.com',
-          clientId: 'drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ',
-          authorizationParams: {
-            redirect_uri: window.location.origin,
-          },
-        });
+    <script>
+        let auth0Client = null;
 
-        if (location.search.includes('code=') && location.search.includes('state=')) {
-          await auth0.handleRedirectCallback();
-          window.location.href = 'https://lms.iicp.in/lms.html';
+        async function initAuth0() {
+            try {
+                auth0Client = await auth0.createAuth0Client({
+                    domain: 'dev-5b7cwnck12qn276l.us.auth0.com',
+                    clientId: 'drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ',
+                    authorizationParams: {
+                        redirect_uri: 'https://lms.iicp.in/lms.html'
+                    }
+                });
+
+                const isAuthenticated = await auth0Client.isAuthenticated();
+                if (isAuthenticated) {
+                    updateUI(true);
+                    // Redirect to lms.html immediately if already authenticated
+                    window.location.href = 'https://lms.iicp.in/lms.html';
+                } else {
+                    updateUI(false);
+                }
+
+                // Handle redirect callback
+                if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+                    await auth0Client.handleRedirectCallback();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    window.location.href = 'https://lms.iicp.in/lms.html';
+                }
+            } catch (error) {
+                console.error('Auth0 initialization error:', error);
+            }
         }
 
-        const isAuthenticated = await auth0.isAuthenticated();
-        if (isAuthenticated) {
-          window.location.href = 'https://lms.iicp.in/lms.html';
-          return;
+        async function login() {
+            try {
+                await auth0Client.loginWithRedirect();
+            } catch (error) {
+                console.error('Login error:', error);
+            }
         }
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
-          await auth0.loginWithRedirect();
-        });
-      } catch (err) {
-        console.error('Auth0 Error:', err);
-        alert('An error occurred. Please try again or check the console for details.');
-      }
-    }
+        async function logout() {
+            try {
+                auth0Client.logout({
+                    logoutParams: {
+                        returnTo: 'https://lms.iicp.in'
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
 
-    window.onload = initAuth0;
-  </script>
+        async function updateUI(isAuthenticated) {
+            const loginButton = document.getElementById('loginButton');
+            const logoutButton = document.getElementById('logoutButton');
+            const userProfile = document.getElementById('userProfile');
+
+            if (isAuthenticated) {
+                const user = await auth0Client.getUser();
+                loginButton.style.display = 'none';
+                logoutButton.style.display = 'inline';
+                userProfile.innerHTML = `Welcome, ${user.name || user.email}`;
+            } else {
+                loginButton.style.display = 'inline';
+                logoutButton.style.display = 'none';
+                userProfile.innerHTML = '';
+            }
+        }
+
+        window.onload = initAuth0;
+    </script>
 </body>
 </html>
