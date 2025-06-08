@@ -10,25 +10,40 @@
     <button id="login">Login with Auth0</button>
   </div>
 
-  <!-- ✅ Load Auth0 script -->
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
 
-  <!-- ✅ Your custom script -->
   <script>
     let auth0Client = null;
 
     const initAuth0 = async () => {
-      auth0Client = await createAuth0Client({
-        domain: "dev-5b7cwnck12qn276l.us.auth0.com",
-        client_id: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
-        redirect_uri: "https://lms.iicp.in/IICP-LMS.html"
-      });
+      try {
+        auth0Client = await createAuth0Client({
+          domain: "dev-5b7cwnck12qn276l.us.auth0.com",
+          client_id: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
+          redirect_uri: "https://lms.iicp.in/IICP-LMS.html"
+        });
 
-      const query = window.location.search;
-      if (query.includes("code=") && query.includes("state=")) {
-        await auth0Client.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/IICP-LMS.html");
-        window.location.href = "https://lms.iicp.in/lms.html"; // ✅ final redirect
+        // Handle post-login redirect callback
+        const query = window.location.search;
+        if (query.includes("code=") && query.includes("state=")) {
+          await auth0Client.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/IICP-LMS.html");
+          // Redirect to root (replace with your actual page, e.g., https://lms.iicp.in/home.html)
+          window.location.href = "https://lms.iicp.in/";
+          return;
+        }
+
+        // Check if user is authenticated
+        const isAuthenticated = await auth0Client.isAuthenticated();
+        if (isAuthenticated) {
+          // Redirect to root (replace with your actual page)
+          window.location.href = "https://lms.iicp.in/";
+        }
+        // If not authenticated, stay on login page
+      } catch (error) {
+        console.error("Auth0 initialization failed:", error);
+        // Optionally display an error message to the user
+        alert("Authentication error. Please try again.");
       }
     };
 
