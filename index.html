@@ -92,7 +92,7 @@
       if (location.search.includes('code=') && location.search.includes('state=')) {
         try {
           await auth0.handleRedirectCallback();
-          window.location.href = 'https://iicp.in/lms.html';
+          window.location.href = 'https://lms.iicp.in/lms.html';
         } catch (err) {
           console.error('Error handling redirect callback:', err);
           alert('Authentication failed. Please try again.');
@@ -101,7 +101,7 @@
 
       const isAuthenticated = await auth0.isAuthenticated();
       if (isAuthenticated) {
-        window.location.href = 'https://iicp.in/lms.html';
+        window.location.href = 'https://lms.iicp.in/lms.html';
         return;
       }
 
