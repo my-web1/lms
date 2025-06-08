@@ -1,112 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IICP LMS - Industry Integrated Career Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f5f6fa; color: #2d3436; }
-        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #2c3e50, #3498db); color: white; border-bottom: 4px solid #2980b9; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
-        .header h1 { font-size: 2.5em; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .header p { font-size: 1.2em; opacity: 0.9; margin-bottom: 15px; }
-        .header .contact-info { display: flex; justify-content: center; gap: 20px; font-size: 1.1em; }
-        .header .contact-info a, .header .contact-info span { color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: color 0.3s ease; }
-        .header .contact-info a:hover { color: #f1c40f; }
-        .header .contact-info i { font-size: 1.3em; }
-        .auth-buttons { margin-top: 20px; }
-        .auth-buttons button { background: #f1c40f; color: #2c3e50; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; margin: 0 5px; transition: background 0.3s; }
-        .auth-buttons button:hover { background: #2980b9; color: #fff; }
-        .container { display: flex; max-width: 1400px; margin: 20px auto; min-height: calc(100vh - 180px); }
-        .sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50, #34495e); color: white; padding: 20px; border-radius: 12px 0 0 12px; box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15); }
-        .sidebar .sidebar-header { text-align: center; padding: 20px 0; border-bottom: 1px solid #4a6278; margin-bottom: 20px; }
-        .sidebar .sidebar-header h2 { font-size: 1.9em; font-weight: 600; margin-bottom: 8px; }
-        .sidebar .sidebar-header p { font-size: 0.95em; opacity: 0.85; }
-        .tabs { display: flex; flex-direction: column; gap: 12px; }
-        .tab { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: #3b4b5e; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; font-size: 1em; }
-        .tab:hover, .tab.active { background: #ffffff; color: #2c3e50; transform: translateX(4px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); }
-        .tab i { font-size: 1.3em; }
-        .content-area { flex: 1; background: #ffffff; padding: 32px; border-radius: 0 12px 12px 0; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1); }
-        .content { display: none; }
-        .content.active { display: block; }
-        .content h2 { margin-bottom: 24px; color: #2c3e50; font-size: 1.8em; font-weight: 600; display: flex; align-items: center; gap: 12px; }
-        .content h2 i { color: #3498db; }
-        .video-list, .link-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .video-item, .link-item { background: #f8f9fd; padding: 16px; border-radius: 8px; transition: all 0.3s ease; border: 1px solid #e9ecef; }
-        .video-item:hover, .link-item:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-        .video-item a, .link-item a { text-decoration: none; color: #3498db; font-weight: 500; display: flex; align-items: center; gap: 10px; }
-        .link-item i { font-size: 1.4em; color: #3498db; }
-        .button { display: inline-block; padding: 10px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 6px; margin-top: 12px; transition: background 0.3s ease; font-weight: 500; }
-        .button:hover { background: #2980b9; }
-        .template { margin-top: 20px; padding: 20px; background: #f8f9fd; border-radius: 8px; border: 1px solid #e9ecef; }
-        .template p { margin-bottom: 16px; line-height: 1.6; }
-        .template h3 { margin-bottom: 12px; font-size: 1.3em; color: #2c3e50; display: flex; align-items: center; gap: 10px; }
-        .footer { text-align: center; padding: 20px; background: #2c3e50; color: white; position: relative; bottom: 0; width: 100%; border-top: 1px solid #4a6278; }
-        .footer p { font-size: 0.95em; opacity: 0.9; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: #2d3436;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            border-bottom: 4px solid #2980b9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .header .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 1.1em;
+        }
+
+        .header .contact-info a, .header .contact-info span {
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .header .contact-info a:hover {
+            color: #f1c40f;
+        }
+
+        .header .contact-info i {
+            font-size: 1.3em;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 20px auto;
+            min-height: calc(100vh - 180px);
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            border-radius: 12px 0 0 12px;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar .sidebar-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #4a6278;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .sidebar-header h2 {
+            font-size: 1.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .sidebar .sidebar-header p {
+            font-size: 0.95em;
+            opacity: 0.85;
+        }
+
+        .tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #3b4b5e;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .tab:hover, .tab.active {
+            background: #ffffff;
+            color: #2c3e50;
+            transform: translateX(4px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .tab i {
+            font-size: 1.3em;
+        }
+
+        .content-area {
+            flex: 1;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 0 12px 12px 0;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .content h2 {
+            margin-bottom: 24px;
+            color: #2c3e50;
+            font-size: 1.8em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content h2 i {
+            color: #3498db;
+        }
+
+        .video-list, .link-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .video-item, .link-item {
+            background: #f8f9fd;
+            padding: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .video-item:hover, .link-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-item a, .link-item a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .link-item i {
+            font-size: 1.4em;
+            color: #3498db;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 24px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 12px;
+            transition: background 0.3s ease;
+            font-weight: 500;
+        }
+
+        .button:hover {
+            background: #2980b9;
+        }
+
+        .template {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fd;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .template p {
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .template h3 {
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid #4a6278;
+        }
+
+        .footer p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
         @media (max-width: 768px) {
-            .container { flex-direction: column; }
-            .sidebar { width: 100%; border-radius: 12px 12px 0 0; }
-            .content-area { border-radius: 0 0 12px 12px; }
-            .video-list, .link-list { grid-template-columns: 1fr; }
-            .header h1 { font-size: 2em; }
-            .header .contact-info { flex-direction: column; gap: 10px; }
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .content-area {
+                border-radius: 0 0 12px 12px;
+            }
+
+            .video-list, .link-list {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header .contact-info {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
-    <!-- Auth0 SPA JS SDK -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
 <body>
 
-    <div id="auth-buttons"></div>
-<div id="user-profile"></div>
 
-<script>
-let auth0Client = null;
-async function configureClient() {
-    auth0Client = await createAuth0Client({
-        domain: "dev-5b7cwnck12qn276l.us.auth0.com",
-        clientId: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
-        cacheLocation: "localstorage",
-        authorizationParams: { redirect_uri: window.location.origin }
-    });
-}
-async function updateUI() {
-    const isAuthenticated = await auth0Client.isAuthenticated();
-    const authButtons = document.getElementById('auth-buttons');
-    const userProfile = document.getElementById('user-profile');
-    if (isAuthenticated) {
-        const user = await auth0Client.getUser();
-        authButtons.innerHTML = '<button id="logout">Logout</button>';
-        userProfile.textContent = "Welcome, " + (user.name || user.email || "User");
-        document.getElementById('logout').onclick = () => auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
-    } else {
-        authButtons.innerHTML = '<button id="login">Login</button>';
-        userProfile.textContent = "";
-        document.getElementById('login').onclick = () => auth0Client.loginWithRedirect();
-    }
-}
-window.onload = async () => {
-    await configureClient();
-    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-        await auth0Client.handleRedirectCallback();
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    updateUI();
-};
-</script>
-    <div class="header">
-        <h1>IICP LMS</h1>
-        <p>Industry Integrated Career Platform</p>
-        <div class="contact-info">
-            <span><i class="fas fa-envelope"></i> info@iicp.com</span>
-            <a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-            <a href="#"><i class="fab fa-telegram"></i> Telegram</a>
-        </div>
-        <div class="auth-buttons" id="auth-buttons"></div>
-        <div id="user-profile" style="margin-top:10px; color: #f1c40f; font-weight: 500;"></div>
-    </div>
     <div class="container">
         <div class="sidebar">
             <div class="sidebar-header">
@@ -125,6 +296,7 @@ window.onload = async () => {
                 <div class="tab" data-tab="hr"><i class="fas fa-question-circle"></i> HR Interview Questions</div>
             </div>
         </div>
+
         <div class="content-area">
             <div class="content active" id="job">
                 <h2><i class="fas fa-bell"></i> Job Alerts</h2>
@@ -133,6 +305,7 @@ window.onload = async () => {
                     <div class="link-item"><a href="#" target="_blank"><i class="fab fa-telegram"></i> Telegram Channel</a></div>
                 </div>
             </div>
+
             <div class="content" id="technical-tests">
                 <h2><i class="fas fa-vial"></i> Technical Tests</h2>
                 <div class="link-list">
@@ -147,6 +320,7 @@ window.onload = async () => {
                     <div class="link-item"><a href="Test/FullStack4.html" target="_blank"><i class="fas fa-file-alt"></i> Full Stack Test 4</a></div>
                 </div>
             </div>
+
             <div class="content" id="interview">
                 <h2><i class="fas fa-microphone"></i> Interview Techniques</h2>
                 <div class="video-list">
@@ -156,6 +330,7 @@ window.onload = async () => {
                     <div class="video-item"><a href="https://youtu.be/c16EqtkZncM?si=euegtP7xK51nUxqi" target="_blank"><i class="fas fa-play-circle"></i> Interview Techniques Video 4</a></div>
                 </div>
             </div>
+
             <div class="content" id="online">
                 <h2><i class="fas fa-video"></i> Online/Virtual Interview Techniques</h2>
                 <div class="video-list">
@@ -163,6 +338,7 @@ window.onload = async () => {
                     <div class="video-item"><a href="https://youtu.be/Svt1ZV_XcP8?si=4VDfcl5xJVAMf30v" target="_blank"><i class="fas fa-play-circle"></i> Virtual Interview Video 2</a></div>
                 </div>
             </div>
+
             <div class="content" id="body">
                 <h2><i class="fas fa-handshake"></i> Body Language</h2>
                 <div class="video-list">
@@ -170,6 +346,7 @@ window.onload = async () => {
                     <div class="video-item"><a href="https://youtu.be/thlJ8FPAS3E?si=U3YtWtrmQXwzu3tc" target="_blank"><i class="fas fa-play-circle"></i> Body Language Video 2</a></div>
                 </div>
             </div>
+
             <div class="content" id="technical">
                 <h2><i class="fas fa-code"></i> Technical Interview Questions & Answers</h2>
                 <div class="link-list">
@@ -206,6 +383,7 @@ window.onload = async () => {
                     <div class="link-item"><a href="https://www.youtube.com/watch?v=oaq02pqYtew" target="_blank"><i class="fas fa-chart-pie"></i> Data Analyst Q&A</a></div>
                 </div>
             </div>
+
             <div class="content" id="self">
                 <h2><i class="fas fa-user"></i> Self Introduction</h2>
                 <div class="template">
@@ -214,6 +392,7 @@ window.onload = async () => {
                     <a href="#" class="button">Add External Resource</a>
                 </div>
             </div>
+
             <div class="content" id="cv">
                 <h2><i class="fas fa-file-alt"></i> CV Builder & Templates</h2>
                 <div class="template">
@@ -221,6 +400,7 @@ window.onload = async () => {
                     <a href="#" class="button">CV Formats</a>
                 </div>
             </div>
+
             <div class="content" id="hr">
                 <h2><i class="fas fa-question-circle"></i> HR Interview Questions</h2>
                 <div class="template">
@@ -235,55 +415,24 @@ window.onload = async () => {
             </div>
         </div>
     </div>
+
     <div class="footer">
         <p>Dr. Sachin Ambekar's IICP - Join Dr. Sachin Ambekar's IICP - Industry Integrated Career Platform to bridge the gap between education and industry.</p>
     </div>
+
     <script>
-        // Tab switching
         const tabs = document.querySelectorAll('.tab');
         const contents = document.querySelectorAll('.content');
+
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
                 contents.forEach(c => c.classList.remove('active'));
+
                 tab.classList.add('active');
                 document.getElementById(tab.dataset.tab).classList.add('active');
             });
         });
-
-        // Auth0 SPA integration
-        let auth0Client = null;
-        async function configureClient() {
-            auth0Client = await createAuth0Client({
-                domain: "dev-5b7cwnck12qn276l.us.auth0.com",
-                clientId: "drGTSEMj1QWmbiVXx2aUDRnIbFCSHgNJ",
-                cacheLocation: "localstorage",
-                authorizationParams: { redirect_uri: window.location.origin }
-            });
-        }
-        async function updateUI() {
-            const isAuthenticated = await auth0Client.isAuthenticated();
-            const authButtons = document.getElementById('auth-buttons');
-            const userProfile = document.getElementById('user-profile');
-            if (isAuthenticated) {
-                const user = await auth0Client.getUser();
-                authButtons.innerHTML = '<button id="logout">Logout</button>';
-                userProfile.textContent = "Welcome, " + (user.name || user.email || "User");
-                document.getElementById('logout').onclick = () => auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
-            } else {
-                authButtons.innerHTML = '<button id="login">Login</button>';
-                userProfile.textContent = "";
-                document.getElementById('login').onclick = () => auth0Client.loginWithRedirect();
-            }
-        }
-        window.onload = async () => {
-            await configureClient();
-            if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            updateUI();
-        };
     </script>
 </body>
 </html>
